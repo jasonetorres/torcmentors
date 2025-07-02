@@ -38,8 +38,11 @@ export default function MenteeManagement() {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  const [users] = useState<User[]>(mockUsers);
+  const [groups] = useState<Group[]>(mockGroups);
+
   // Get all mentees and their current group assignments
-  const mentees = mockUsers.filter(user => user.role === 'mentee');
+  const mentees = users.filter(user => user.role === 'mentee');
   const unassignedMentees = mentees.filter(mentee => !mentee.groupId);
   const assignedMentees = mentees.filter(mentee => mentee.groupId);
 
