@@ -12,6 +12,7 @@ import Progress from "./pages/Progress";
 import Onboarding from "./pages/Onboarding";
 import Groups from "./pages/Groups";
 import Users from "./pages/Users";
+import GroupChat from "./pages/GroupChat";
 import Resources from "./pages/Resources";
 import Analytics from "./pages/Analytics";
 import Surveys from "./pages/Surveys";
@@ -97,6 +98,7 @@ function AppRoutes() {
         
         {/* Shared Routes */}
         <Route path="/communication" element={<Communication />} />
+        <Route path="/group-chat" element={<GroupChat />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/goals" element={<Goals />} />
         <Route path="/tasks" element={<Tasks />} />

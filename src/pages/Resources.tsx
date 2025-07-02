@@ -68,12 +68,12 @@ export default function Resources() {
     },
     {
       id: 'resource-6',
-      title: 'Introduction to Mentorship Video',
-      description: 'Welcome video explaining the program structure and expectations',
-      type: 'video' as const,
+      title: 'Introduction to Mentorship Guide',
+      description: 'Welcome guide explaining the program structure and expectations',
+      type: 'document' as const,
       phase: 'phase1' as ProgramPhase,
       category: 'Program Introduction',
-      tags: ['intro', 'video', 'overview'],
+      tags: ['intro', 'guide', 'overview'],
       createdAt: new Date('2025-01-01'),
       updatedAt: new Date('2025-01-01'),
       isPublic: true,
@@ -84,7 +84,7 @@ export default function Resources() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'document': return FileText;
-      case 'video': return Video;
+      case 'document': return FileText;
       case 'link': return LinkIcon;
       case 'template': return FileText;
       case 'case-study': return BookOpen;
@@ -95,7 +95,7 @@ export default function Resources() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'document': return 'bg-primary/20 text-primary border-primary/30';
-      case 'video': return 'bg-accent/20 text-accent border-accent/30';
+      case 'document': return 'bg-primary/20 text-primary border-primary/30';
       case 'link': return 'bg-success/20 text-success border-success/30';
       case 'template': return 'bg-warning/20 text-warning border-warning/30';
       case 'case-study': return 'bg-secondary text-secondary-foreground';
@@ -150,7 +150,7 @@ export default function Resources() {
         {[
           { title: "Total Resources", value: "156", icon: BookOpen, color: "text-primary" },
           { title: "Templates", value: "42", icon: FileText, color: "text-accent" },
-          { title: "Video Content", value: "28", icon: Video, color: "text-success" },
+          { title: "Documents", value: "28", icon: FileText, color: "text-success" },
           { title: "Case Studies", value: "15", icon: Star, color: "text-warning" }
         ].map((stat) => (
           <Card key={stat.title} className="bg-gradient-card border-border shadow-card">
@@ -217,7 +217,7 @@ export default function Resources() {
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="guides">Guides</TabsTrigger>
-          <TabsTrigger value="videos">Videos</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="case-studies">Case Studies</TabsTrigger>
         </TabsList>
 
@@ -362,29 +362,6 @@ export default function Resources() {
           </div>
         </TabsContent>
 
-        <TabsContent value="videos">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredResources.filter(r => r.type === 'video').map((resource) => (
-              <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
-                <div className="aspect-video bg-secondary rounded-t-lg flex items-center justify-center">
-                  <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center">
-                    <Video className="w-8 h-8 text-accent" />
-                  </div>
-                </div>
-                <CardHeader>
-                  <CardTitle>{resource.title}</CardTitle>
-                  <CardDescription>{resource.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full bg-gradient-accent">
-                    <Video className="w-4 h-4 mr-2" />
-                    Watch Video
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
 
         <TabsContent value="case-studies">
           <div className="space-y-6">

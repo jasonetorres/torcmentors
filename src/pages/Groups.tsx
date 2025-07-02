@@ -14,8 +14,10 @@ import {
   Clock,
   Star,
   Settings,
-  MoreVertical
+  MoreVertical,
+  UserCog
 } from 'lucide-react';
+import MenteeManagement from '@/components/admin/MenteeManagement';
 import { mockGroups, mockUsers } from '@/data/mockData';
 
 export default function Groups() {
@@ -145,18 +147,19 @@ export default function Groups() {
         </CardContent>
       </Card>
 
-      {/* Groups Grid */}
+      {/* Groups Management */}
       <Tabs defaultValue="active" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-secondary">
+        <TabsList className="grid w-full grid-cols-4 bg-secondary">
           <TabsTrigger value="active">Active Groups</TabsTrigger>
           <TabsTrigger value="forming">Forming</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="manage">Manage Mentees</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
             {allGroups.map((group) => (
-              <Card key={group.id} className="bg-gradient-card border-border shadow-card hover:shadow-lg transition-shadow">
+              <Card key={group.id} className="bg-gradient-card border-border shadow-card hover:shadow-lg transition-shadow mb-6 p-1 bg-gradient-to-br from-background to-secondary/50">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{group.name}</CardTitle>
@@ -227,6 +230,26 @@ export default function Groups() {
                       <MessageSquare className="w-4 h-4" />
                     </Button>
                   </div>
+                  
+                  {/* Group Chat Preview */}
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-muted-foreground">Latest Activity</span>
+                      <Button variant="ghost" size="sm" className="h-6 text-xs px-2">
+                        Open Chat
+                      </Button>
+                    </div>
+                    <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-primary rounded-full"></div>
+                        <span className="text-xs font-medium">{mockUsers.find(u => u.id === group.mentorId)?.name}</span>
+                        <span className="text-xs text-muted-foreground">2 min ago</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        "Don't forget our meeting tomorrow at {group.meetingSchedule}"
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -255,6 +278,10 @@ export default function Groups() {
               Groups that complete the full 12-week program will appear here.
             </p>
           </div>
+        </TabsContent>
+
+        <TabsContent value="manage" className="space-y-6">
+          <MenteeManagement />
         </TabsContent>
       </Tabs>
     </div>
