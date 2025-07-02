@@ -4,6 +4,7 @@ export type ProgramPhase = 'phase1' | 'phase2' | 'phase3' | 'phase4';
 
 export type OnboardingStep = 
   | 'welcome'
+  | 'account-setup'
   | 'profile-setup' 
   | 'goal-setting'
   | 'tool-setup'
@@ -33,6 +34,7 @@ export interface User {
   githubUrl?: string;
   discordUsername?: string;
   preferredVideoTool?: string;
+  accessCode?: string;
 }
 
 export interface Group {

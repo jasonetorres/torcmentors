@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
+import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
 import Groups from "./pages/Groups";
@@ -46,8 +47,16 @@ function AppRoutes() {
     );
   }
 
-  // User not onboarded - show onboarding
+  // User not onboarded - show setup flow
   if (!user.isOnboardingComplete) {
+    if (user.onboardingStep === 'account-setup') {
+      return (
+        <Routes>
+          <Route path="/setup" element={<AccountSetup />} />
+          <Route path="*" element={<Navigate to="/setup" replace />} />
+        </Routes>
+      );
+    }
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
