@@ -3,29 +3,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, Key, Shield, Mail } from 'lucide-react';
+import { Star, Key, Shield, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [accessCode, setAccessCode] = useState('');
+  const [password, setPassword] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState<'participant' | 'admin'>('participant');
-  const { loginWithEmailCode, adminLogin } = useAuth();
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const { loginWithEmailCode, loginWithEmailPassword, adminLogin, checkUserExists } = useAuth();
   const { toast } = useToast();
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (value && loginType === 'participant') {
+      setIsReturningUser(checkUserExists(value));
+    }
+  };
 
   const handleParticipantLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      await loginWithEmailCode(email, accessCode);
+      if (isReturningUser) {
+        await loginWithEmailPassword(email, password);
+      } else {
+        await loginWithEmailCode(email, accessCode);
+      }
     } catch (error) {
       toast({
         title: "Access Denied",
-        description: "Invalid email or access code. Please check your credentials and try again.",
+        description: isReturningUser 
+          ? "Invalid email or password. Please check your credentials and try again."
+          : "Invalid email or access code. Please check your credentials and try again.",
         variant: "destructive"
       });
     } finally {
@@ -131,28 +146,46 @@ export default function Login() {
                         type="email"
                         placeholder="your.email@example.com"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => handleEmailChange(e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="accessCode">Access Code</Label>
-                    <div className="relative mt-1">
-                      <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        id="accessCode"
-                        type="text"
-                        placeholder="mentor or mentee2025"
-                        value={accessCode}
-                        onChange={(e) => setAccessCode(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
+                  {isReturningUser ? (
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <Label htmlFor="accessCode">Access Code</Label>
+                      <div className="relative mt-1">
+                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          id="accessCode"
+                          type="text"
+                          placeholder="mentor or mentee2025"
+                          value={accessCode}
+                          onChange={(e) => setAccessCode(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button 

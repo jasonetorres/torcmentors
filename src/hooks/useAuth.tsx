@@ -4,11 +4,13 @@ import { User } from '@/types';
 interface AuthContextType {
   user: User | null;
   loginWithEmailCode: (email: string, code: string) => Promise<void>;
+  loginWithEmailPassword: (email: string, password: string) => Promise<void>;
   adminLogin: (password: string) => Promise<void>;
   completeAccountSetup: (setupData: any) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   isLoading: boolean;
+  checkUserExists: (email: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -98,6 +100,40 @@ export function useAuthState() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const checkUserExists = (email: string): boolean => {
+    const normalizedEmail = email.toLowerCase().trim();
+    const storedUsers = localStorage.getItem('torc-registered-users');
+    if (storedUsers) {
+      const users = JSON.parse(storedUsers);
+      return users.some((user: any) => user.email === normalizedEmail);
+    }
+    return false;
+  };
+
+  const loginWithEmailPassword = async (email: string, password: string) => {
+    setIsLoading(true);
+    
+    const normalizedEmail = email.toLowerCase().trim();
+    const storedUsers = localStorage.getItem('torc-registered-users');
+    
+    if (storedUsers) {
+      const users = JSON.parse(storedUsers);
+      const user = users.find((u: any) => u.email === normalizedEmail && u.password === password);
+      
+      if (user) {
+        // Remove password from user object before setting
+        const { password: _, ...userWithoutPassword } = user;
+        localStorage.setItem('torc-user', JSON.stringify(userWithoutPassword));
+        setUser(userWithoutPassword);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    setIsLoading(false);
+    throw new Error('Invalid email or password');
+  };
 
   const loginWithEmailCode = async (email: string, code: string) => {
     setIsLoading(true);
@@ -211,7 +247,7 @@ export function useAuthState() {
       ...user,
       id: `${user.role}-${Date.now()}`,
       name: setupData.name,
-      email: setupData.email,
+      email: user.email,
       bio: setupData.bio,
       linkedinUrl: setupData.linkedinUrl,
       githubUrl: setupData.githubUrl,
@@ -222,6 +258,16 @@ export function useAuthState() {
       groupId: user.role === 'mentor' ? undefined : 'unassigned',
       avatar: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000)}?w=32&h=32&fit=crop&crop=face`,
     };
+
+    // Store user with password for future logins
+    const userWithPassword = { ...completedUser, password: setupData.password };
+    const storedUsers = localStorage.getItem('torc-registered-users');
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    
+    // Remove any existing user with same email and add new one
+    const filteredUsers = users.filter((u: any) => u.email !== user.email);
+    filteredUsers.push(userWithPassword);
+    localStorage.setItem('torc-registered-users', JSON.stringify(filteredUsers));
 
     localStorage.setItem('torc-user', JSON.stringify(completedUser));
     setUser(completedUser);
@@ -244,11 +290,13 @@ export function useAuthState() {
   return {
     user,
     loginWithEmailCode,
+    loginWithEmailPassword,
     adminLogin,
     completeAccountSetup,
     logout,
     updateUser,
-    isLoading
+    isLoading,
+    checkUserExists
   };
 }
 

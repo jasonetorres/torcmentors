@@ -19,6 +19,7 @@ import Goals from "./pages/Goals";
 import Tasks from "./pages/Tasks";
 import Meetings from "./pages/Meetings";
 import Group from "./pages/Group";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
 
@@ -98,6 +99,7 @@ function AppRoutes() {
         <Route path="/meetings" element={<Meetings />} />
         <Route path="/group" element={<Group />} />
         <Route path="/progress" element={<Progress />} />
+        <Route path="/settings" element={<Settings />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
