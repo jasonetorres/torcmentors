@@ -93,7 +93,12 @@ export function useAuthState() {
     const timer = setTimeout(() => {
       const savedUser = localStorage.getItem('torc-user');
       if (savedUser) {
-        setUser(JSON.parse(savedUser));
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch (error) {
+          console.error('Error parsing saved user, clearing localStorage:', error);
+          localStorage.removeItem('torc-user');
+        }
       }
       setIsLoading(false);
     }, 500);
