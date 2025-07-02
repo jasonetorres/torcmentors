@@ -14,12 +14,14 @@ import Groups from "./pages/Groups";
 import Users from "./pages/Users";
 import Resources from "./pages/Resources";
 import Analytics from "./pages/Analytics";
+import Surveys from "./pages/Surveys";
 import MentorKit from "./pages/MentorKit";
 import Goals from "./pages/Goals";
 import Tasks from "./pages/Tasks";
 import Meetings from "./pages/Meetings";
 import Group from "./pages/Group";
 import Settings from "./pages/Settings";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
 
@@ -81,6 +83,7 @@ function AppRoutes() {
             <Route path="/groups" element={<Groups />} />
             <Route path="/users" element={<Users />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/surveys" element={<Surveys />} />
           </>
         )}
         
@@ -88,6 +91,7 @@ function AppRoutes() {
         {user.role === 'mentor' && (
           <>
             <Route path="/mentor-kit" element={<MentorKit />} />
+            <Route path="/feedback" element={<Feedback />} />
           </>
         )}
         
