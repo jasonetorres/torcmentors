@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
@@ -22,9 +21,10 @@ import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function AppRoutes() {
   const { user, isLoading } = useAuth();
 
+  // Show loading screen
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -36,20 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!user.isOnboardingComplete) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  return <>{children}</>;
-}
-
-function AppRoutes() {
-  const { user } = useAuth();
-
+  // No user - show login
   if (!user) {
     return (
       <Routes>
@@ -59,6 +46,7 @@ function AppRoutes() {
     );
   }
 
+  // User not onboarded - show onboarding
   if (!user.isOnboardingComplete) {
     return (
       <Routes>
@@ -68,6 +56,7 @@ function AppRoutes() {
     );
   }
 
+  // User authenticated and onboarded - show main app
   return (
     <Layout>
       <Routes>
