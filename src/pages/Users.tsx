@@ -25,40 +25,8 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'all' | UserRole>('all');
 
-  // Mock additional users
-  const allUsers = [
-    ...mockUsers,
-    {
-      id: '4',
-      name: 'Emily Johnson',
-      email: 'emily.johnson@email.com',
-      role: 'mentor' as UserRole,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-      groupId: 'group-2',
-      createdAt: new Date('2025-01-04'),
-      lastActive: new Date(),
-      onboardingStep: 'completed' as const,
-      isOnboardingComplete: true,
-      bio: 'Backend architect with expertise in microservices',
-      skills: ['Node.js', 'Python', 'AWS', 'Docker'],
-      experience: '8+ years'
-    },
-    {
-      id: '5',
-      name: 'Michael Brown',
-      email: 'michael.brown@email.com',
-      role: 'mentee' as UserRole,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-      groupId: 'group-1',
-      createdAt: new Date('2025-01-06'),
-      lastActive: new Date(),
-      onboardingStep: 'profile-setup' as const,
-      isOnboardingComplete: false,
-      bio: 'Switching from finance to software development',
-      skills: ['Python', 'SQL'],
-      experience: '6 months'
-    }
-  ];
+  // Real users data will be loaded from database
+  const allUsers: any[] = [];
 
   const stats = [
     { title: "Total Users", value: "52", change: "+8 this month", icon: Users, color: "text-primary" },

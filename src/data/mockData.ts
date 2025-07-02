@@ -12,80 +12,9 @@ import {
   Notification
 } from '@/types';
 
-// Mock Users
-export const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Jason Torres',
-    email: 'jason@torc.dev',
-    role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-    createdAt: new Date('2025-01-01'),
-    lastActive: new Date(),
-    onboardingStep: 'completed',
-    isOnboardingComplete: true,
-    bio: 'Program Coordinator and Community Evangelist',
-    skills: ['Leadership', 'Program Management', 'Community Building'],
-    experience: '8+ years',
-    linkedinUrl: 'https://linkedin.com/in/jasontorres',
-    githubUrl: 'https://github.com/jasontorres'
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@email.com',
-    role: 'mentor',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face',
-    groupId: 'group-1',
-    createdAt: new Date('2025-01-02'),
-    lastActive: new Date(),
-    onboardingStep: 'completed',
-    isOnboardingComplete: true,
-    bio: 'Senior Software Engineer with expertise in React and Node.js',
-    skills: ['React', 'Node.js', 'TypeScript', 'System Design'],
-    experience: '6+ years',
-    linkedinUrl: 'https://linkedin.com/in/sarahchen',
-    githubUrl: 'https://github.com/sarahchen',
-    discordUsername: 'sarah#5678',
-    preferredVideoTool: 'Google Meet'
-  },
-  {
-    id: '3',
-    name: 'Alex Rivera',
-    email: 'alex.rivera@email.com',
-    role: 'mentee',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-    groupId: 'group-1',
-    createdAt: new Date('2025-01-03'),
-    lastActive: new Date(),
-    onboardingStep: 'tool-setup',
-    isOnboardingComplete: false,
-    bio: 'Aspiring full-stack developer transitioning from marketing',
-    skills: ['HTML', 'CSS', 'JavaScript'],
-    experience: '1 year',
-    linkedinUrl: 'https://linkedin.com/in/alexrivera',
-    githubUrl: 'https://github.com/alexrivera'
-  }
-];
-
-// Mock Groups
-export const mockGroups: Group[] = [
-  {
-    id: 'group-1',
-    name: 'Frontend Focus Group',
-    mentorId: '2',
-    menteeIds: ['3', '4', '5'],
-    currentPhase: 'phase1',
-    status: 'active',
-    createdAt: new Date('2025-01-02'),
-    discordChannel: '#frontend-focus',
-    githubRepo: 'torc-mentorship/frontend-focus',
-    meetingSchedule: 'Wednesdays 6PM EST',
-    nextMeeting: new Date('2025-01-15T18:00:00'),
-    completedSessions: 2,
-    totalSessions: 12
-  }
-];
+// Mock Users and Groups - now managed through authentication system
+export const mockUsers: User[] = [];
+export const mockGroups: Group[] = [];
 
 // Mock Goals
 export const mockGoals: Goal[] = [
@@ -212,70 +141,7 @@ export const mockResources: Resource[] = [
   }
 ];
 
-// Mock Mentor Kits
-export const mockMentorKits: MentorKit[] = [
-  {
-    id: 'kit-phase1',
-    phase: 'phase1',
-    title: 'Launch & Goal Setting',
-    description: 'Establish rapport, introduce program structure, and define mentee goals',
-    prepTime: 90,
-    objectives: [
-      'Build group rapport and establish trust',
-      'Introduce program structure and expectations',
-      'Guide mentees through SMART goal setting',
-      'Create actionable development plans'
-    ],
-    resources: mockResources.filter(r => r.phase === 'phase1'),
-    discussionPoints: [
-      'Share personal development journeys',
-      'Discuss common challenges in tech careers',
-      'Explore individual motivations and aspirations',
-      'Review program timeline and milestones'
-    ],
-    activities: [
-      {
-        id: 'activity-1',
-        title: 'Goal Setting Workshop',
-        description: 'Interactive session to define and refine development goals',
-        type: 'workshop',
-        duration: 45,
-        instructions: [
-          'Have each mentee share their preliminary goals',
-          'Use SMART criteria to evaluate and refine goals',
-          'Create action plans with specific next steps',
-          'Set accountability measures and check-in schedules'
-        ],
-        expectedOutcomes: [
-          '2-3 well-defined SMART goals per mentee',
-          'Clear action plans with next steps',
-          'Established accountability framework'
-        ]
-      }
-    ],
-    templates: [
-      {
-        id: 'template-1',
-        title: 'Goal Setting Worksheet',
-        type: 'template',
-        phase: 'phase1',
-        category: 'Goal Setting',
-        tags: ['template', 'goals', 'worksheet'],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPublic: true
-      }
-    ],
-    nextSteps: [
-      'Schedule regular check-ins on goal progress',
-      'Share additional resources based on individual goals',
-      'Prepare for Phase 2 foundation topics',
-      'Encourage peer connections and support'
-    ],
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01')
-  }
-];
+// Mock mentor kits have been moved to src/data/mentorKits.ts for production use
 
 // Mock Analytics
 export const mockAnalytics: Analytics = {

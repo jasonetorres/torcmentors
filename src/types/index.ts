@@ -118,7 +118,7 @@ export interface Resource {
   id: string;
   title: string;
   description?: string;
-  type: 'document' | 'link' | 'template' | 'case-study' | 'exercise';
+  type: 'document' | 'link' | 'template' | 'case-study' | 'exercise' | 'guide';
   url?: string;
   content?: string;
   phase: ProgramPhase;

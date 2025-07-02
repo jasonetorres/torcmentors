@@ -18,45 +18,13 @@ import {
   UserCog
 } from 'lucide-react';
 import MenteeManagement from '@/components/admin/MenteeManagement';
-import { mockGroups, mockUsers } from '@/data/mockData';
+import { mockUsers, mockGroups } from '@/data/mockData';
 
 export default function Groups() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock additional groups data
-  const allGroups = [
-    ...mockGroups,
-    {
-      id: 'group-2',
-      name: 'Backend Masters',
-      mentorId: '10',
-      menteeIds: ['11', '12', '13', '14'],
-      currentPhase: 'phase2' as const,
-      status: 'active' as const,
-      createdAt: new Date('2025-01-05'),
-      discordChannel: '#backend-masters',
-      githubRepo: 'torc-mentorship/backend-masters',
-      meetingSchedule: 'Fridays 7PM EST',
-      nextMeeting: new Date('2025-01-17T19:00:00'),
-      completedSessions: 3,
-      totalSessions: 12
-    },
-    {
-      id: 'group-3',
-      name: 'Career Transitions',
-      mentorId: '15',
-      menteeIds: ['16', '17'],
-      currentPhase: 'phase1' as const,
-      status: 'active' as const,
-      createdAt: new Date('2025-01-08'),
-      discordChannel: '#career-transitions',
-      githubRepo: 'torc-mentorship/career-transitions',
-      meetingSchedule: 'Thursdays 6:30PM EST',
-      nextMeeting: new Date('2025-01-16T18:30:00'),
-      completedSessions: 1,
-      totalSessions: 12
-    }
-  ];
+  // Real groups data will be loaded from database
+  const allGroups: any[] = [];
 
   const stats = [
     { title: "Total Groups", value: "10", change: "+2 this month", icon: Users, color: "text-primary" },
@@ -168,7 +136,7 @@ export default function Groups() {
                     </Button>
                   </div>
                   <CardDescription>
-                    Mentor: {mockUsers.find(u => u.id === group.mentorId)?.name || 'Unknown'}
+                    Mentor: Unknown
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -242,7 +210,7 @@ export default function Groups() {
                     <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-primary rounded-full"></div>
-                        <span className="text-xs font-medium">{mockUsers.find(u => u.id === group.mentorId)?.name}</span>
+                        <span className="text-xs font-medium">Unknown Mentor</span>
                         <span className="text-xs text-muted-foreground">2 min ago</span>
                       </div>
                       <p className="text-xs text-muted-foreground">

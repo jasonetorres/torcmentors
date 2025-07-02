@@ -19,7 +19,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { MentorKit, ProgramPhase } from '@/types';
-import { mockMentorKits } from '@/data/mockData';
+import { mentorKits } from '@/data/mentorKits';
 
 interface MentorKitViewerProps {
   phase: ProgramPhase;
@@ -30,7 +30,7 @@ export function MentorKitViewer({ phase, onMarkComplete }: MentorKitViewerProps)
   const [selectedTab, setSelectedTab] = useState('overview');
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
 
-  const mentorKit = mockMentorKits.find(kit => kit.phase === phase);
+  const mentorKit = mentorKits.find(kit => kit.phase === phase);
 
   if (!mentorKit) {
     return (

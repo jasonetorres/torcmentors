@@ -27,6 +27,7 @@ import {
   UserMinus
 } from 'lucide-react';
 import { mockUsers, mockGroups } from '@/data/mockData';
+import { User, Group } from '@/types';
 import { UserRole } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -48,13 +49,13 @@ export default function MenteeManagement() {
   );
 
   const getGroupName = (groupId: string) => {
-    return mockGroups.find(g => g.id === groupId)?.name || 'Unknown Group';
+    return groups.find(g => g.id === groupId)?.name || 'Unknown Group';
   };
 
   const getMentorName = (groupId: string) => {
-    const group = mockGroups.find(g => g.id === groupId);
+    const group = groups.find(g => g.id === groupId);
     if (!group) return 'Unknown Mentor';
-    return mockUsers.find(u => u.id === group.mentorId)?.name || 'Unknown Mentor';
+    return users.find(u => u.id === group.mentorId)?.name || 'Unknown Mentor';
   };
 
   const handleAssignMentee = () => {
@@ -124,7 +125,7 @@ export default function MenteeManagement() {
                     <SelectValue placeholder="Choose a group" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockGroups.map((group) => (
+                    {groups.map((group) => (
                       <SelectItem key={group.id} value={group.id}>
                         {group.name} - {getMentorName(group.id)}
                       </SelectItem>

@@ -84,10 +84,9 @@ export default function GroupChat() {
     }
   ]);
 
-  const userGroup = mockGroups.find(g => g.menteeIds.includes(user?.id || '') || g.mentorId === user?.id);
-  const groupMembers = mockUsers.filter(u => 
-    userGroup && (u.id === userGroup.mentorId || userGroup.menteeIds.includes(u.id))
-  );
+  // Real implementation will load user's group from database
+  const userGroup = null;
+  const groupMembers: any[] = [];
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -99,11 +98,13 @@ export default function GroupChat() {
 
   const getUserName = (userId: string) => {
     if (userId === 'system') return 'System';
-    return mockUsers.find(u => u.id === userId)?.name || 'Unknown';
+    // Real implementation will load from user database
+    return 'Unknown';
   };
 
   const getUserAvatar = (userId: string) => {
-    return mockUsers.find(u => u.id === userId)?.avatar;
+    // Real implementation will load from user database
+    return undefined;
   };
 
   const formatTime = (date: Date) => {
