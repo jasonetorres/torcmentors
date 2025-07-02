@@ -3,16 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, Key, Shield } from 'lucide-react';
+import { Star, Key, Shield, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
+  const [email, setEmail] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState<'participant' | 'admin'>('participant');
-  const { loginWithCode, adminLogin } = useAuth();
+  const { loginWithEmailCode, adminLogin } = useAuth();
   const { toast } = useToast();
 
   const handleParticipantLogin = async (e: React.FormEvent) => {
@@ -20,11 +21,11 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      await loginWithCode(accessCode);
+      await loginWithEmailCode(email, accessCode);
     } catch (error) {
       toast({
-        title: "Invalid Access Code",
-        description: "Please check your access code and try again.",
+        title: "Access Denied",
+        description: "Invalid email or access code. Please check your credentials and try again.",
         variant: "destructive"
       });
     } finally {
@@ -82,10 +83,18 @@ export default function Login() {
               <div className="flex items-start gap-3">
                 <Key className="w-5 h-5 text-primary mt-1" />
                 <div>
-                  <p className="font-medium text-foreground">Have an Access Code?</p>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your unique access code to join as a mentor or mentee and set up your account.
-                  </p>
+                  <p className="font-medium text-foreground">Mentors</p>
+                  <p className="text-sm text-muted-foreground">Enter your email + code "mentor"</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-gradient-card border border-border">
+              <div className="flex items-start gap-3">
+                <Key className="w-5 h-5 text-primary mt-1" />
+                <div>
+                  <p className="font-medium text-foreground">Mentees</p>
+                  <p className="text-sm text-muted-foreground">Enter your email + code "mentee2025"</p>
                 </div>
               </div>
             </div>
@@ -94,9 +103,9 @@ export default function Login() {
               <div className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-accent mt-1" />
                 <div>
-                  <p className="font-medium text-foreground">Program Administrator?</p>
+                  <p className="font-medium text-foreground">Program Administrator</p>
                   <p className="text-sm text-muted-foreground">
-                    Use your admin credentials to manage the mentorship program.
+                    Use admin password to manage the mentorship program.
                   </p>
                 </div>
               </div>
@@ -127,28 +136,43 @@ export default function Login() {
               {loginType === 'participant' ? 'Join Program' : 'Admin Access'}
             </CardTitle>
             <CardDescription>
-              {loginType === 'participant' 
-                ? 'Enter your access code to get started'
-                : 'Enter admin credentials to manage the program'
-              }
+              Enter your email and access code to get started
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loginType === 'participant' ? (
               <form onSubmit={handleParticipantLogin} className="space-y-6">
-                <div>
-                  <Label htmlFor="accessCode">Access Code</Label>
-                  <div className="relative mt-1">
-                    <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="accessCode"
-                      type="text"
-                      placeholder="Enter your access code"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                      className="pl-10"
-                      required
-                    />
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="relative mt-1">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your.email@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="accessCode">Access Code</Label>
+                    <div className="relative mt-1">
+                      <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="accessCode"
+                        type="text"
+                        placeholder="mentor or mentee2025"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 

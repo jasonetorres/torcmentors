@@ -50,7 +50,6 @@ export default function AccountSetup() {
     try {
       await completeAccountSetup({
         name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
         password: formData.password,
         bio: formData.bio,
         linkedinUrl: formData.linkedinUrl,
@@ -140,13 +139,12 @@ export default function AccountSetup() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="john.doe@example.com"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="pl-10"
-                      required
+                      value={user?.email || ''}
+                      className="pl-10 bg-secondary"
+                      disabled
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">This is your registered email address</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

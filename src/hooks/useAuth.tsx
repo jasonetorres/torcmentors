@@ -3,7 +3,7 @@ import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
-  loginWithCode: (accessCode: string) => Promise<void>;
+  loginWithEmailCode: (email: string, code: string) => Promise<void>;
   adminLogin: (password: string) => Promise<void>;
   completeAccountSetup: (setupData: any) => Promise<void>;
   logout: () => void;
@@ -21,15 +21,66 @@ export function useAuth() {
   return context;
 }
 
-// Access codes for different roles
-const ACCESS_CODES = {
-  'MENTOR2024': 'mentor',
-  'MENTEE2024': 'mentee',
-  'COHORT1': 'mentee',
-  'COHORT2': 'mentee',
-  'COACH2024': 'mentor'
-};
+// Pre-approved mentor emails
+const APPROVED_MENTORS = [
+  'giovannydeleon@gmail.com',
+  'jacobjohntorres@gmail.com', 
+  'ashish.ojha@aol.in',
+  'brjedi@gmail.com',
+  'moises.alejandro.serrano@gmail.com',
+  'robertjcameron@yahoo.com',
+  'pvmagacho@gmail.com',
+  'pete@codeonthebeach.com',
+  'me@dandigangi.com',
+  'leeanahjames@gmail.com',
+  'amcp.engineer@gmail.com'
+];
 
+// Pre-approved mentee emails  
+const APPROVED_MENTEES = [
+  'martina.berns@ingenieria.uner.edu.ar',
+  'pranshuraj65536+torc@gmail.com',
+  'jagrut.pratik@gmail.com',
+  'danmndes@gmail.com',
+  'philipminielly@gmail.com',
+  'johnsonolaolu@gmail.com',
+  'adetomiwaabdul@gmail.com',
+  'vishalpawarr.git@gmail.com',
+  'kiriaditi15@gmail.com',
+  'jsprogramming.123@gmail.com',
+  'gauravkalita.nlp@gmail.com',
+  'umreutkarsh@gmail.com',
+  'menyagah27@gmail.com',
+  'hast.job@gmail.com',
+  'teyenike1@gmail.com',
+  'isaacscheff@gmail.com',
+  'cjmooredev@gmail.com',
+  'anjukaranji@gmail.com',
+  'shittuidris45@gmail.com',
+  'dassandrew3@gmail.com',
+  'kpctyn@gmail.com',
+  'enver.francisco@gmail.com',
+  'mohhasbias@gmail.com',
+  'tarsis1477@gmail.com',
+  'olawalekareemdev@gmail.com',
+  'merytpeters@gmail.com',
+  'davonnejv@gmail.com',
+  'luke.floden@gmail.com',
+  'walterfurrer@proton.me',
+  'michaeljohnraymond@gmail.com',
+  'kelly.m.hill2115@gmail.com',
+  'Luckyjoseph1996@gmail.com',
+  'saiddetz@gmail.com',
+  'ranhindavibhashana@gmail.com',
+  'menezes.ecd@gmail.com',
+  'brandon.hamilton.dev@gmail.com',
+  'bryanfinesw@gmail.com',
+  'mmebit@icloud.com',
+  'cmelendezgp@gmail.com'
+];
+
+const MENTOR_CODE = 'mentor';
+const MENTEE_CODE = 'mentee2025';
 const ADMIN_PASSWORD = 'torc-admin-2024';
 
 export function useAuthState() {
@@ -48,40 +99,72 @@ export function useAuthState() {
     return () => clearTimeout(timer);
   }, []);
 
-  const loginWithCode = async (accessCode: string) => {
+  const loginWithEmailCode = async (email: string, code: string) => {
     setIsLoading(true);
     
-    const role = ACCESS_CODES[accessCode as keyof typeof ACCESS_CODES];
-    if (!role) {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check mentor credentials
+    if (code === MENTOR_CODE && APPROVED_MENTORS.includes(normalizedEmail)) {
+      const tempUser: User = {
+        id: `temp-mentor-${Date.now()}`,
+        name: '',
+        email: normalizedEmail,
+        role: 'mentor',
+        avatar: '',
+        createdAt: new Date(),
+        lastActive: new Date(),
+        onboardingStep: 'account-setup',
+        isOnboardingComplete: false,
+        groupId: undefined,
+        bio: '',
+        skills: [],
+        experience: '',
+        linkedinUrl: '',
+        githubUrl: '',
+        discordUsername: '',
+        preferredVideoTool: 'Google Meet',
+        accessCode: code
+      };
+
+      localStorage.setItem('torc-user', JSON.stringify(tempUser));
+      setUser(tempUser);
       setIsLoading(false);
-      throw new Error('Invalid access code');
+      return;
     }
     
-    // Create temporary user for setup flow
-    const tempUser: User = {
-      id: `temp-${Date.now()}`,
-      name: '',
-      email: '',
-      role: role as 'mentor' | 'mentee',
-      avatar: '',
-      createdAt: new Date(),
-      lastActive: new Date(),
-      onboardingStep: 'account-setup',
-      isOnboardingComplete: false,
-      groupId: undefined,
-      bio: '',
-      skills: [],
-      experience: '',
-      linkedinUrl: '',
-      githubUrl: '',
-      discordUsername: '',
-      preferredVideoTool: 'Google Meet',
-      accessCode: accessCode
-    };
+    // Check mentee credentials
+    if (code === MENTEE_CODE && APPROVED_MENTEES.includes(normalizedEmail)) {
+      const tempUser: User = {
+        id: `temp-mentee-${Date.now()}`,
+        name: '',
+        email: normalizedEmail,
+        role: 'mentee',
+        avatar: '',
+        createdAt: new Date(),
+        lastActive: new Date(),
+        onboardingStep: 'account-setup',
+        isOnboardingComplete: false,
+        groupId: undefined,
+        bio: '',
+        skills: [],
+        experience: '',
+        linkedinUrl: '',
+        githubUrl: '',
+        discordUsername: '',
+        preferredVideoTool: 'Google Meet',
+        accessCode: code
+      };
 
-    localStorage.setItem('torc-user', JSON.stringify(tempUser));
-    setUser(tempUser);
+      localStorage.setItem('torc-user', JSON.stringify(tempUser));
+      setUser(tempUser);
+      setIsLoading(false);
+      return;
+    }
+    
+    // Invalid credentials
     setIsLoading(false);
+    throw new Error('Invalid email or access code');
   };
 
   const adminLogin = async (password: string) => {
@@ -135,10 +218,8 @@ export function useAuthState() {
       discordUsername: setupData.discordUsername,
       onboardingStep: 'completed',
       isOnboardingComplete: true,
-      // Assign to groups based on access code
-      groupId: user.accessCode?.includes('COHORT1') ? 'group-1' : 
-               user.accessCode?.includes('COHORT2') ? 'group-2' : 
-               user.role === 'mentor' ? 'group-1' : 'group-1',
+      // Auto-assign group based on role (admin can reassign later)
+      groupId: user.role === 'mentor' ? undefined : 'unassigned',
       avatar: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000)}?w=32&h=32&fit=crop&crop=face`,
     };
 
@@ -162,7 +243,7 @@ export function useAuthState() {
 
   return {
     user,
-    loginWithCode,
+    loginWithEmailCode,
     adminLogin,
     completeAccountSetup,
     logout,
