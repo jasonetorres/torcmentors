@@ -214,7 +214,7 @@ export function useAuthState() {
     const adminUser: User = {
       id: 'admin-1',
       name: 'Program Administrator',
-      email: 'admin@torc.dev',
+      email: 'jason@torc.dev',
       role: 'admin',
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
       createdAt: new Date(),
@@ -256,7 +256,7 @@ export function useAuthState() {
       isOnboardingComplete: true,
       // Auto-assign group based on role (admin can reassign later)
       groupId: user.role === 'mentor' ? undefined : 'unassigned',
-      avatar: `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000000)}?w=32&h=32&fit=crop&crop=face`,
+      avatar: setupData.avatar,
     };
 
     // Store user with password for future logins

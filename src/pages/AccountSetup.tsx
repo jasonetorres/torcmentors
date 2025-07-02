@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, User, Lock, Mail } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star, User, Lock, Mail, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,8 +19,18 @@ export default function AccountSetup() {
     bio: '',
     linkedinUrl: '',
     githubUrl: '',
-    discordUsername: ''
+    discordUsername: '',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'
   });
+  
+  const avatarOptions = [
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=80&h=80&fit=crop&crop=face'
+  ];
   const [isLoading, setIsLoading] = useState(false);
   const { completeAccountSetup, user } = useAuth();
   const { toast } = useToast();
@@ -54,7 +65,8 @@ export default function AccountSetup() {
         bio: formData.bio,
         linkedinUrl: formData.linkedinUrl,
         githubUrl: formData.githubUrl,
-        discordUsername: formData.discordUsername
+        discordUsername: formData.discordUsername,
+        avatar: formData.avatar
       });
       
       toast({
@@ -181,6 +193,43 @@ export default function AccountSetup() {
               {/* Profile Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Profile Information</h3>
+                
+                {/* Profile Picture Selection */}
+                <div>
+                  <Label>Profile Picture</Label>
+                  <div className="mt-2 space-y-3">
+                    <div className="flex justify-center">
+                      <Avatar className="w-20 h-20 border-4 border-primary/20">
+                        <AvatarImage src={formData.avatar} alt="Selected avatar" />
+                        <AvatarFallback>
+                          <Camera className="w-8 h-8 text-muted-foreground" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      {avatarOptions.map((avatarUrl, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleInputChange('avatar', avatarUrl)}
+                          className={`p-1 rounded-lg border-2 transition-all hover:scale-105 ${
+                            formData.avatar === avatarUrl 
+                              ? 'border-primary shadow-glow' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={avatarUrl} alt={`Avatar option ${index + 1}`} />
+                            <AvatarFallback>
+                              <User className="w-4 h-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
                 
                 <div>
                   <Label htmlFor="bio">Bio</Label>
