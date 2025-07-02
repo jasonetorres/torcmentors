@@ -76,36 +76,15 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Access Information */}
+          {/* Private Access Notice */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Getting Started</h3>
             <div className="p-4 rounded-lg bg-gradient-card border border-border">
               <div className="flex items-start gap-3">
                 <Key className="w-5 h-5 text-primary mt-1" />
                 <div>
-                  <p className="font-medium text-foreground">Mentors</p>
-                  <p className="text-sm text-muted-foreground">Enter your email + code "mentor"</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 rounded-lg bg-gradient-card border border-border">
-              <div className="flex items-start gap-3">
-                <Key className="w-5 h-5 text-primary mt-1" />
-                <div>
-                  <p className="font-medium text-foreground">Mentees</p>
-                  <p className="text-sm text-muted-foreground">Enter your email + code "mentee2025"</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 rounded-lg bg-gradient-card border border-border">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-accent mt-1" />
-                <div>
-                  <p className="font-medium text-foreground">Program Administrator</p>
+                  <p className="font-medium text-foreground">Authorized Access Only</p>
                   <p className="text-sm text-muted-foreground">
-                    Use admin password to manage the mentorship program.
+                    Access credentials have been sent to approved participants via email.
                   </p>
                 </div>
               </div>
