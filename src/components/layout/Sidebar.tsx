@@ -42,6 +42,7 @@ export default function Sidebar() {
   const mentorNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
     { name: 'My Group', href: '/group', icon: Users, badge: '3' },
+    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: '5' },
     { name: 'Mentor Kit', href: '/mentor-kit', icon: Briefcase, badge: 'New' },
     { name: 'Meetings', href: '/meetings', icon: Calendar, badge: '2' },
     { name: 'Goals & Progress', href: '/goals', icon: Target, badge: null },
@@ -54,6 +55,7 @@ export default function Sidebar() {
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
     { name: 'My Goals', href: '/goals', icon: Target, badge: '3' },
     { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: '2' },
+    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: '3' },
     { name: 'Meetings', href: '/meetings', icon: Calendar, badge: '1' },
     { name: 'Group', href: '/group', icon: Users, badge: null },
     { name: 'Resources', href: '/resources', icon: BookOpen, badge: null },

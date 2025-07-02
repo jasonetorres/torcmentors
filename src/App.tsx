@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
 import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
+import Communication from "./pages/Communication";
+import Progress from "./pages/Progress";
 import Onboarding from "./pages/Onboarding";
 import Groups from "./pages/Groups";
 import Users from "./pages/Users";
@@ -89,11 +91,13 @@ function AppRoutes() {
         )}
         
         {/* Shared Routes */}
+        <Route path="/communication" element={<Communication />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/goals" element={<Goals />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/meetings" element={<Meetings />} />
         <Route path="/group" element={<Group />} />
+        <Route path="/progress" element={<Progress />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
