@@ -50,8 +50,8 @@ function AppRoutes() {
     );
   }
 
-  // User not onboarded - show setup flow
-  if (!user.isOnboardingComplete) {
+  // User not onboarded - show setup flow (except for admin)
+  if (!user.isOnboardingComplete && user.role !== 'admin') {
     if (user.onboardingStep === 'account-setup') {
       return (
         <Routes>
