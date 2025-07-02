@@ -13,7 +13,8 @@ import {
   Star,
   ArrowRight,
   Zap,
-  BookOpen
+  BookOpen,
+  FileText
 } from 'lucide-react';
 
 export default function Dashboard() {
