@@ -64,20 +64,6 @@ export default function Resources() {
       url: '/resources/smart-goals.pdf'
     },
     {
-      id: 'resource-2',
-      title: 'React Fundamentals Workshop',
-      description: 'Interactive video series covering React basics, hooks, and component patterns',
-      type: 'video',
-      phase: 'phase2',
-      category: 'Technical Skills',
-      tags: ['react', 'javascript', 'frontend'],
-      createdAt: new Date('2025-01-02'),
-      updatedAt: new Date('2025-01-02'),
-      isPublic: true,
-      estimatedReadTime: 120,
-      url: 'https://youtube.com/watch?v=example'
-    },
-    {
       id: 'resource-3',
       title: 'Effective Communication in Tech',
       description: 'Slide deck outline for leading discussions on communication and feedback',
@@ -165,6 +151,24 @@ export default function Resources() {
     toast({
       title: "Resource Deleted",
       description: "Resource has been removed successfully.",
+    });
+  };
+
+  const handleViewResource = (resource: Resource) => {
+    if (resource.url) {
+      window.open(resource.url, '_blank');
+    } else {
+      toast({
+        title: "Resource Available",
+        description: `Opening ${resource.title}...`,
+      });
+    }
+  };
+
+  const handleEditResource = (resourceId: string) => {
+    toast({
+      title: "Edit Resource",
+      description: "Resource editing functionality coming soon.",
     });
   };
 
@@ -440,17 +444,29 @@ export default function Resources() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewResource(resource)}
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     View
                   </Button>
                   {resource.url && (
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(resource.url, '_blank')}
+                    >
                       <Download className="w-4 h-4 mr-2" />
-                      Download
+                      Open Link
                     </Button>
                   )}
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditResource(resource.id)}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -478,15 +494,24 @@ export default function Resources() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Upload", description: "File upload functionality coming soon." })}
+            >
               <Upload className="w-4 h-4 mr-2" />
               Upload Files
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Import", description: "Library import functionality coming soon." })}
+            >
               <BookOpen className="w-4 h-4 mr-2" />
               Import from Library
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Featured", description: "Featured resources functionality coming soon." })}
+            >
               <Star className="w-4 h-4 mr-2" />
               Featured Resources
             </Button>
