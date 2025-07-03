@@ -14,6 +14,7 @@ export default function AccountSetup() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    torcProfile: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -128,6 +129,8 @@ export default function AccountSetup() {
         github_url: formData.githubUrl,
         discord_username: formData.discordUsername,
         avatar_url: formData.avatar,
+        // Store torcProfile in experience field for now
+        experience: formData.torcProfile,
         is_onboarding_complete: true,
         onboarding_step: 'completed'
       });
@@ -205,7 +208,24 @@ export default function AccountSetup() {
                       required
                     />
                   </div>
-                </div>
+                 </div>
+
+                 <div>
+                   <Label htmlFor="torcProfile">Torc Profile</Label>
+                   <div className="relative mt-1">
+                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                     <Input
+                       id="torcProfile"
+                       type="text"
+                       placeholder="Your Torc community profile name"
+                       value={formData.torcProfile}
+                       onChange={(e) => handleInputChange('torcProfile', e.target.value)}
+                       className="pl-10"
+                       required
+                     />
+                   </div>
+                   <p className="text-xs text-muted-foreground mt-1">This will be your username in the Torc community</p>
+                 </div>
 
                 <div>
                   <Label htmlFor="email">Email Address</Label>
