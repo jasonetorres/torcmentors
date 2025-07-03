@@ -44,44 +44,7 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'all' | UserRole>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [users, setUsers] = useState<AppUser[]>([
-    {
-      id: 'user-1',
-      name: 'Sarah Chen',
-      email: 'sarah.chen@example.com',
-      role: 'mentor',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=48&h=48&fit=crop&crop=face',
-      bio: 'Senior Software Engineer with 8 years of experience',
-      isOnboardingComplete: true,
-      lastActive: new Date(),
-      experience: 'Senior Level',
-      createdAt: new Date('2025-01-01')
-    },
-    {
-      id: 'user-2',
-      name: 'Alex Rivera',
-      email: 'alex.rivera@example.com',
-      role: 'mentee',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face',
-      bio: 'Career changer from marketing to tech',
-      isOnboardingComplete: true,
-      lastActive: new Date(),
-      experience: 'Entry Level',
-      createdAt: new Date('2025-01-05')
-    },
-    {
-      id: 'user-3',
-      name: 'Emma Thompson',
-      email: 'emma.thompson@example.com',
-      role: 'mentee',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=48&h=48&fit=crop&crop=face',
-      bio: 'Recent bootcamp graduate',
-      isOnboardingComplete: false,
-      lastActive: new Date(Date.now() - 86400000),
-      experience: 'Beginner',
-      createdAt: new Date('2025-01-10')
-    }
-  ]);
+  const [users, setUsers] = useState<AppUser[]>([]);
 
   const [newUser, setNewUser] = useState({
     name: '',
@@ -137,10 +100,10 @@ export default function UsersPage() {
   };
 
   const stats = [
-    { title: "Total Users", value: users.length.toString(), change: "+8 this month", icon: Users, color: "text-primary" },
-    { title: "Active Mentors", value: users.filter(u => u.role === 'mentor').length.toString(), change: "100% online", icon: GraduationCap, color: "text-success" },
-    { title: "Learning Mentees", value: users.filter(u => u.role === 'mentee').length.toString(), change: "+8 this month", icon: Star, color: "text-accent" },
-    { title: "Pending Onboarding", value: users.filter(u => !u.isOnboardingComplete).length.toString(), change: "-2 this week", icon: Clock, color: "text-warning" }
+    { title: "Total Users", value: users.length.toString(), change: "", icon: Users, color: "text-primary" },
+    { title: "Active Mentors", value: users.filter(u => u.role === 'mentor').length.toString(), change: "", icon: GraduationCap, color: "text-success" },
+    { title: "Learning Mentees", value: users.filter(u => u.role === 'mentee').length.toString(), change: "", icon: Star, color: "text-accent" },
+    { title: "Pending Onboarding", value: users.filter(u => !u.isOnboardingComplete).length.toString(), change: "", icon: Clock, color: "text-warning" }
   ];
 
   const getRoleColor = (role: UserRole) => {
