@@ -14,7 +14,7 @@ import {
   MoreVertical,
   Pin
 } from 'lucide-react';
-import { mockUsers, mockGroups } from '@/data/mockData';
+
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface Message {

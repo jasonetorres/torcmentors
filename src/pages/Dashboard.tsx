@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useRolePreview } from '@/hooks/useRolePreview';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,34 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { getEffectiveRole } = useRolePreview();
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user || !profile) return;
+      
+      try {
+        // Fetch all profiles to show real users
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .neq('user_id', user.id);
+
+        if (error) {
+          console.error('Error fetching profiles:', error);
+        } else {
+          setGroupMembers(profiles || []);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user, profile]);
 
   const handleQuickResourceClick = (resource: string) => {
     if (resource === 'mentor-kit' || resource === 'goal-guide') {
@@ -42,16 +72,19 @@ export default function Dashboard() {
 
   const isMentor = effectiveRole === 'mentor';
 
+  const mentees = groupMembers.filter(member => member.role === 'mentee');
+  const mentors = groupMembers.filter(member => member.role === 'mentor');
+  
   const stats = isMentor ? [
-    { title: "Group Members", value: "3", change: "mentees", icon: Users, color: "text-primary" },
-    { title: "Completed Sessions", value: "2/12", change: "this phase", icon: Calendar, color: "text-accent" },
-    { title: "Active Goals", value: "8", change: "across group", icon: Target, color: "text-success" },
-    { title: "Next Meeting", value: "2 days", change: "Wednesday 6PM", icon: Clock, color: "text-warning" }
+    { title: "Total Users", value: groupMembers.length.toString(), change: "in system", icon: Users, color: "text-primary" },
+    { title: "Mentees", value: mentees.length.toString(), change: "registered", icon: Calendar, color: "text-accent" },
+    { title: "Mentors", value: mentors.length.toString(), change: "available", icon: Target, color: "text-success" },
+    { title: "System Status", value: "Active", change: "running smoothly", icon: Clock, color: "text-warning" }
   ] : [
-    { title: "Active Goals", value: "3", change: "+1 this week", icon: Target, color: "text-primary" },
-    { title: "Tasks Due", value: "2", change: "this week", icon: CheckSquare, color: "text-warning" },
-    { title: "Progress Score", value: "85%", change: "+5% this month", icon: TrendingUp, color: "text-success" },
-    { title: "Next Meeting", value: "2 days", change: "Wednesday 6PM", icon: Clock, color: "text-accent" }
+    { title: "Your Role", value: profile?.role || 'mentee', change: "current role", icon: Target, color: "text-primary" },
+    { title: "Profile", value: profile?.display_name ? "Complete" : "Setup", change: "status", icon: CheckSquare, color: "text-warning" },
+    { title: "Community", value: groupMembers.length.toString(), change: "total members", icon: TrendingUp, color: "text-success" },
+    { title: "Welcome", value: "👋", change: "to Torc!", icon: Clock, color: "text-accent" }
   ];
 
   return (
@@ -126,92 +159,56 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               {isMentor ? (
-                // Mentor view - Group progress
-                <>
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-primary">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Alex Rivera</h4>
-                      <Badge variant="outline" className="border-success text-success">On Track</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Full-stack development goals • 2/3 milestones complete
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-primary h-2 rounded-full w-2/3" />
-                    </div>
+                // Mentor view - Real user profiles
+                loading ? (
+                  <div className="p-4 text-center text-muted-foreground">Loading user data...</div>
+                ) : groupMembers.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <p>No other users registered yet.</p>
+                    <p className="text-sm mt-1">Users will appear here as they join the platform.</p>
                   </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-warning">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Jordan Kim</h4>
-                      <Badge variant="outline" className="border-warning text-warning">Needs Support</Badge>
+                ) : (
+                  groupMembers.slice(0, 3).map((member) => (
+                    <div key={member.id} className="p-4 rounded-lg bg-secondary/50 border-l-4 border-primary">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-foreground">
+                          {member.display_name || 'New User'}
+                        </h4>
+                        <Badge variant="outline" className="border-primary text-primary">
+                          {member.role || 'Member'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {member.bio || 'Profile being set up...'}
+                      </p>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div className="bg-gradient-primary h-2 rounded-full w-1/2" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Joined {new Date(member.created_at).toLocaleDateString()}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      React specialization • 1/3 milestones complete
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-accent h-2 rounded-full w-1/3" />
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-accent">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Sam Taylor</h4>
-                      <Badge variant="outline" className="border-primary text-primary">Excelling</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      System design mastery • 3/3 milestones complete
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-primary h-2 rounded-full w-full" />
-                    </div>
-                  </div>
-                </>
+                  ))
+                )
               ) : (
-                // Mentee view - Personal goals
-                <>
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-primary">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Build Full-Stack Application</h4>
-                      <Badge variant="outline" className="border-primary text-primary">In Progress</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Create a complete web app using React and Node.js
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-primary h-2 rounded-full w-1/3" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">2/6 milestones complete</p>
+                // Mentee view - Your profile info
+                <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-primary">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-foreground">Your Profile</h4>
+                    <Badge variant="outline" className="border-primary text-primary">
+                      {profile?.is_onboarding_complete ? 'Complete' : 'In Progress'}
+                    </Badge>
                   </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-success">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Master React Fundamentals</h4>
-                      <Badge variant="outline" className="border-success text-success">Completed</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Learn core React concepts and hooks
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-accent h-2 rounded-full w-full" />
-                    </div>
-                    <p className="text-xs text-success mt-2">Completed 2 weeks ago</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {profile?.bio || 'Complete your profile in Settings to get started'}
+                  </p>
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div className="bg-gradient-primary h-2 rounded-full w-3/4" />
                   </div>
-                  
-                  <div className="p-4 rounded-lg bg-secondary/50 border-l-4 border-accent">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">Improve Communication Skills</h4>
-                      <Badge variant="outline" className="border-accent text-accent">Active</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Practice technical presentations and feedback
-                    </p>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-gradient-accent h-2 rounded-full w-1/2" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">1/2 milestones complete</p>
-                  </div>
-                </>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'recently'}
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>

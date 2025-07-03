@@ -23,7 +23,7 @@ import {
   Flag,
   User
 } from 'lucide-react';
-import { mockGoals } from '@/data/mockData';
+
 import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Goals() {
@@ -34,60 +34,8 @@ export default function Goals() {
 
   const isMentor = profile?.role === 'mentor';
 
-  // Mock additional goals for mentees
-  const [allGoals, setAllGoals] = useState([
-    ...mockGoals,
-    {
-      id: 'goal-2',
-      userId: '3',
-      title: 'Learn Backend Development',
-      description: 'Master Node.js, Express, and database design principles',
-      category: 'technical' as const,
-      priority: 'medium' as const,
-      status: 'pending' as const,
-      targetDate: new Date('2025-08-01'),
-      createdAt: new Date('2025-01-05'),
-      progress: 0,
-      milestones: [
-        {
-          id: 'milestone-4',
-          title: 'Set up Node.js environment',
-          completed: false
-        },
-        {
-          id: 'milestone-5',
-          title: 'Build first REST API',
-          completed: false
-        }
-      ]
-    },
-    {
-      id: 'goal-3',
-      userId: '4',
-      title: 'Improve Code Review Skills',
-      description: 'Learn to give and receive constructive code feedback',
-      category: 'personal' as const,
-      priority: 'high' as const,
-      status: 'in-progress' as const,
-      targetDate: new Date('2025-04-01'),
-      createdAt: new Date('2025-01-07'),
-      progress: 60,
-      milestones: [
-        {
-          id: 'milestone-6',
-          title: 'Review 10 pull requests',
-          completed: true,
-          completedAt: new Date('2025-01-12')
-        },
-        {
-          id: 'milestone-7',
-          title: 'Practice giving feedback',
-          completed: false
-        }
-      ],
-      mentorNotes: 'Great improvement in feedback quality. Focus on being more specific.'
-    }
-  ]);
+  // Sample goals - no real data stored yet
+  const [allGoals, setAllGoals] = useState<any[]>([]);
 
   const [newGoal, setNewGoal] = useState({
     title: '',
