@@ -63,24 +63,18 @@ export default function Communication() {
   ]);
 
   const handleCreateChannel = () => {
-    toast({
-      title: "Create Channel",
-      description: "Channel creation feature will be implemented soon",
-    });
+    // Navigate to meetings page to schedule a meeting
+    window.location.href = '/meetings';
   };
 
   const handleVideoCall = () => {
-    toast({
-      title: "Video Call",
-      description: "Starting video call feature...",
-    });
+    // Open a new meeting room
+    window.open('https://meet.google.com/', '_blank');
   };
 
   const handleVoiceCall = () => {
-    toast({
-      title: "Voice Call", 
-      description: "Starting voice call feature...",
-    });
+    // Open a voice call interface
+    window.open('https://discord.com/', '_blank'); 
   };
 
   const handleMoreOptions = () => {
@@ -91,17 +85,25 @@ export default function Communication() {
   };
 
   const handleAttachFile = () => {
-    toast({
-      title: "Attach File",
-      description: "File attachment feature coming soon",
-    });
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,document/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        toast({
+          title: "File Selected",
+          description: `Selected: ${file.name}`,
+        });
+      }
+    };
+    input.click();
   };
 
   const handleAddEmoji = () => {
-    toast({
-      title: "Add Emoji",
-      description: "Emoji picker coming soon",
-    });
+    const emojis = ['👍', '❤️', '😊', '🎉', '👏', '🔥', '💯', '🚀'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    setNewMessage(prev => prev + randomEmoji);
   };
 
   const isMentor = profile?.role === 'mentor';

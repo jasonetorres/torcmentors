@@ -113,6 +113,33 @@ export default function GroupChat() {
       isOnline: true
     }
   ];
+  
+  const handleCreateChannel = () => {
+    // Navigate to meetings page to schedule a meeting
+    window.location.href = '/meetings';
+  };
+
+  const handleAttachFile = () => {
+    // Create a file input and trigger it
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,document/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        // In real implementation, would upload file and add to message
+        setNewMessage(prev => prev + ` [File: ${file.name}]`);
+      }
+    };
+    input.click();
+  };
+
+  const handleAddEmoji = () => {
+    // Add common emojis to the message
+    const emojis = ['👍', '❤️', '😊', '🎉', '👏', '🔥', '💯', '🚀'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    setNewMessage(prev => prev + randomEmoji);
+  };
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -155,7 +182,7 @@ export default function GroupChat() {
           <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
             {userGroup.status}
           </Badge>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleCreateChannel}>
             <Calendar className="w-4 h-4 mr-2" />
             Schedule Meeting
           </Button>
@@ -235,7 +262,7 @@ export default function GroupChat() {
               {/* Message Input */}
               <div className="border-t border-border p-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={handleAttachFile}>
                     <Paperclip className="w-4 h-4" />
                   </Button>
                   <div className="flex-1 relative">
@@ -252,7 +279,7 @@ export default function GroupChat() {
                       className="pr-16"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={handleAddEmoji}>
                         <Smile className="w-4 h-4" />
                       </Button>
                       <Button 
