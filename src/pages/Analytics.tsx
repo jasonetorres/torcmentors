@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -18,6 +20,28 @@ import {
 import { mockAnalytics } from '@/data/mockData';
 
 export default function Analytics() {
+  const { toast } = useToast();
+
+  const handleFilter = () => {
+    toast({
+      title: "Filters",
+      description: "Filter functionality coming soon",
+    });
+  };
+
+  const handleRefresh = () => {
+    toast({
+      title: "Refreshed",
+      description: "Analytics data has been refreshed",
+    });
+  };
+
+  const handleExport = () => {
+    toast({
+      title: "Export Started",
+      description: "Your analytics report is being generated",
+    });
+  };
   const overviewStats = [
     { 
       title: "Program Completion Rate", 
@@ -60,15 +84,15 @@ export default function Analytics() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleFilter}>
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
-          <Button size="sm" className="bg-gradient-primary">
+          <Button size="sm" className="bg-gradient-primary" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>

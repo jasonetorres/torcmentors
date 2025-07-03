@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ import { useRolePreview } from '@/hooks/useRolePreview';
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { getEffectiveRole } = useRolePreview();
 
@@ -71,6 +72,14 @@ export default function Sidebar() {
     effectiveRole === 'admin' ? adminNavItems :
     effectiveRole === 'mentor' ? mentorNavItems :
     menteeNavItems;
+
+  const handleNextMeetingClick = () => {
+    navigate('/meetings');
+  };
+
+  const handleTasksClick = () => {
+    navigate('/tasks');
+  };
 
   return (
     <div className={cn(
@@ -159,7 +168,8 @@ export default function Sidebar() {
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full justify-start text-xs"
+              className="w-full justify-start text-xs hover:bg-secondary/80 transition-colors"
+              onClick={handleNextMeetingClick}
             >
               <Clock className="w-4 h-4 mr-2" />
               Next Meeting: Wed 6PM
@@ -167,7 +177,8 @@ export default function Sidebar() {
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full justify-start text-xs"
+              className="w-full justify-start text-xs hover:bg-secondary/80 transition-colors"
+              onClick={handleTasksClick}
             >
               <FileText className="w-4 h-4 mr-2" />
               2 Tasks Due Soon

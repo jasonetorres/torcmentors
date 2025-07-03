@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { 
   Users, 
   UserPlus, 
@@ -43,8 +46,14 @@ interface Group {
 
 export default function Groups() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { profile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [assigningGroup, setAssigningGroup] = useState<Group | null>(null);
   const [groups, setGroups] = useState<Group[]>([
     {
       id: 'group-1',
@@ -143,6 +152,72 @@ export default function Groups() {
       title: "Group Deleted",
       description: "Group has been removed successfully.",
     });
+  };
+
+  const handleEditGroup = (group: Group) => {
+    setEditingGroup(group);
+    setNewGroup({
+      name: group.name,
+      description: group.description,
+      phase: group.phase,
+      mentorId: group.mentorId,
+      maxSize: group.maxSize.toString(),
+      schedule: group.schedule
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateGroup = () => {
+    if (!editingGroup || !newGroup.name.trim() || !newGroup.description.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const updatedGroups = groups.map(group => 
+      group.id === editingGroup.id 
+        ? {
+            ...group,
+            name: newGroup.name,
+            description: newGroup.description,
+            phase: newGroup.phase,
+            mentorId: newGroup.mentorId || 'unassigned',
+            mentorName: newGroup.mentorId ? 'Assigned Mentor' : 'Unassigned',
+            maxSize: parseInt(newGroup.maxSize),
+            schedule: newGroup.schedule
+          }
+        : group
+    );
+
+    setGroups(updatedGroups);
+    setEditingGroup(null);
+    setNewGroup({
+      name: '',
+      description: '',
+      phase: 'phase1',
+      mentorId: '',
+      maxSize: '4',
+      schedule: ''
+    });
+    setIsEditDialogOpen(false);
+
+    toast({
+      title: "Group Updated",
+      description: "Group has been updated successfully.",
+    });
+  };
+
+  const handleChatClick = (group: Group) => {
+    // Navigate to group chat with the specific group
+    navigate(`/group-chat?groupId=${group.id}`);
+  };
+
+  const handleAssignUsers = (group: Group) => {
+    setAssigningGroup(group);
+    setIsAssignDialogOpen(true);
   };
 
   const stats = [
@@ -353,23 +428,61 @@ export default function Groups() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditGroup(group)}
+                >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleChatClick(group)}
+                >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Chat
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleDeleteGroup(group.id)}
-                  className="text-destructive hover:bg-destructive/20"
+                  onClick={() => handleAssignUsers(group)}
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
+                  <UserCog className="w-4 h-4 mr-2" />
+                  Manage Users
                 </Button>
+                {profile?.role === 'admin' && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/20"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{group.name}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteGroup(group.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -395,6 +508,141 @@ export default function Groups() {
           <MenteeManagement />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Group Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Group</DialogTitle>
+            <DialogDescription>
+              Update the group details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="editGroupName">Group Name</Label>
+              <Input 
+                id="editGroupName" 
+                placeholder="e.g., Frontend Focus Group"
+                value={newGroup.name}
+                onChange={(e) => setNewGroup({...newGroup, name: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="editDescription">Description</Label>
+              <Textarea 
+                id="editDescription" 
+                placeholder="Describe the group's focus and goals..."
+                value={newGroup.description}
+                onChange={(e) => setNewGroup({...newGroup, description: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="editPhase">Phase</Label>
+                <Select value={newGroup.phase} onValueChange={(value) => setNewGroup({...newGroup, phase: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select phase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="phase1">Phase 1</SelectItem>
+                    <SelectItem value="phase2">Phase 2</SelectItem>
+                    <SelectItem value="phase3">Phase 3</SelectItem>
+                    <SelectItem value="phase4">Phase 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="editMaxSize">Max Size</Label>
+                <Select value={newGroup.maxSize} onValueChange={(value) => setNewGroup({...newGroup, maxSize: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 people</SelectItem>
+                    <SelectItem value="4">4 people</SelectItem>
+                    <SelectItem value="5">5 people</SelectItem>
+                    <SelectItem value="6">6 people</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="editSchedule">Meeting Schedule</Label>
+              <Input 
+                id="editSchedule" 
+                placeholder="e.g., Wednesdays 6:00 PM EST"
+                value={newGroup.schedule}
+                onChange={(e) => setNewGroup({...newGroup, schedule: e.target.value})}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex-1 bg-gradient-primary" onClick={handleUpdateGroup}>
+                Update Group
+              </Button>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Users Dialog */}
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Manage Users - {assigningGroup?.name}</DialogTitle>
+            <DialogDescription>
+              Assign mentor and mentees to this group
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Available Mentors</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a mentor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mentor-1">Sarah Chen</SelectItem>
+                  <SelectItem value="mentor-2">Mike Rodriguez</SelectItem>
+                  <SelectItem value="mentor-3">Jessica Park</SelectItem>
+                  <SelectItem value="mentor-4">David Kim</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Available Mentees</Label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {['Alice Johnson', 'Bob Smith', 'Carol Davis', 'Dan Wilson', 'Eva Brown'].map((mentee) => (
+                  <div key={mentee} className="flex items-center space-x-2">
+                    <input type="checkbox" id={mentee} className="rounded" />
+                    <label htmlFor={mentee} className="text-sm">{mentee}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                className="flex-1 bg-gradient-primary" 
+                onClick={() => {
+                  setIsAssignDialogOpen(false);
+                  toast({
+                    title: "Users Assigned",
+                    description: "Mentor and mentees have been assigned to the group.",
+                  });
+                }}
+              >
+                Assign Users
+              </Button>
+              <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

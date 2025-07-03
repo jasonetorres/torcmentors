@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useRolePreview } from '@/hooks/useRolePreview';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
@@ -19,8 +20,19 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { getEffectiveRole } = useRolePreview();
+
+  const handleQuickResourceClick = (resource: string) => {
+    if (resource === 'mentor-kit' || resource === 'goal-guide') {
+      navigate('/mentor-kit');
+    } else if (resource === 'group-management' || resource === 'group-chat') {
+      navigate('/group-chat');
+    } else if (resource === 'progress-templates' || resource === 'goals-workshop') {
+      navigate('/goals');
+    }
+  };
 
   const effectiveRole = getEffectiveRole(profile?.role);
 
@@ -251,17 +263,32 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" size="sm" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-start"
+                onClick={() => handleQuickResourceClick(isMentor ? 'mentor-kit' : 'goal-guide')}
+              >
                 <FileText className="w-4 h-4 mr-2" />
                 {isMentor ? 'Phase 2 Mentor Kit' : 'Goal Setting Guide'}
               </Button>
               
-              <Button variant="outline" size="sm" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-start"
+                onClick={() => handleQuickResourceClick(isMentor ? 'group-management' : 'group-chat')}
+              >
                 <Users className="w-4 h-4 mr-2" />
                 {isMentor ? 'Group Management' : 'Study Group Chat'}
               </Button>
               
-              <Button variant="outline" size="sm" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-start"
+                onClick={() => handleQuickResourceClick(isMentor ? 'progress-templates' : 'goals-workshop')}
+              >
                 <Target className="w-4 h-4 mr-2" />
                 {isMentor ? 'Progress Templates' : 'SMART Goals Workshop'}
               </Button>

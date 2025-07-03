@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import { 
   MessageSquare, 
   Send, 
@@ -43,10 +44,18 @@ interface Channel {
 }
 
 export default function Communication() {
+  const { toast } = useToast();
   const { user, profile } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleCreateChannel = () => {
+    toast({
+      title: "Create Channel",
+      description: "Channel creation feature coming soon",
+    });
+  };
 
   const isMentor = profile?.role === 'mentor';
 
@@ -167,7 +176,7 @@ export default function Communication() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Channels</h2>
             {isMentor && (
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={handleCreateChannel}>
                 <Plus className="w-4 h-4" />
               </Button>
             )}
