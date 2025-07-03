@@ -10,12 +10,12 @@ export default function RolePreviewSwitcher() {
     <div className="flex items-center gap-2">
       <Eye className="w-4 h-4 text-muted-foreground" />
       <span className="text-sm text-muted-foreground">Preview as:</span>
-      <Select value={previewRole || ''} onValueChange={(value) => setPreviewRole(value as any || null)}>
+      <Select value={previewRole || 'admin'} onValueChange={(value) => setPreviewRole(value === 'admin' ? null : value as any)}>
         <SelectTrigger className="w-32 h-8">
           <SelectValue placeholder="Admin" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Admin</SelectItem>
+          <SelectItem value="admin">Admin</SelectItem>
           <SelectItem value="mentor">Mentor</SelectItem>
           <SelectItem value="mentee">Mentee</SelectItem>
         </SelectContent>
