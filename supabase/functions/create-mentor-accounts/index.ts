@@ -14,6 +14,11 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   }
 })
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 const mentorEmails = [
   'giovannydeleon@gmail.com',
   'jacobjohntorres@gmail.com',
@@ -36,6 +41,11 @@ interface Result {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
     const results: Result[] = []
     
@@ -80,7 +90,7 @@ Deno.serve(async (req) => {
       results,
       message: `Created ${results.filter(r => r.success).length} mentor accounts`
     }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
       status: 200
     })
 
@@ -90,7 +100,7 @@ Deno.serve(async (req) => {
       success: false,
       error: error.message
     }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
       status: 500
     })
   }
