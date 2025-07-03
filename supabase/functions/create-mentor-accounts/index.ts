@@ -15,11 +15,17 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 })
 
 const mentorEmails = [
-  'mentor1@torc.community',
-  'mentor2@torc.community',
-  'mentor3@torc.community',
-  'mentor4@torc.community',
-  'mentor5@torc.community'
+  'giovannydeleon@gmail.com',
+  'jacobjohntorres@gmail.com',
+  'ashish.ojha@aol.in',
+  'brjedi@gmail.com',
+  'moises.alejandro.serrano@gmail.com',
+  'robertjcameron@yahoo.com',
+  'pvmagacho@gmail.com',
+  'pete@codeonthebeach.com',
+  'me@dandigangi.com',
+  'leeanahjames@gmail.com',
+  'amcp.engineer@gmail.com'
 ]
 
 interface Result {
