@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useSupabaseAuth";
-import { RolePreviewProvider } from "@/hooks/useRolePreview";
+import { RolePreviewProvider, useRolePreview } from "@/hooks/useRolePreview";
 import Auth from "./pages/Auth";
 import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
@@ -31,6 +31,7 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, profile, isLoading } = useAuth();
+  const { getEffectiveRole } = useRolePreview();
 
   // Show loading screen
   if (isLoading) {
@@ -73,6 +74,8 @@ function AppRoutes() {
   }
 
   // User authenticated and onboarded - show main app
+  const effectiveRole = getEffectiveRole(profile?.role);
+  
   return (
     <Layout>
       <Routes>
@@ -80,7 +83,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Admin Routes */}
-        {profile?.role === 'admin' && (
+        {effectiveRole === 'admin' && (
           <>
             <Route path="/groups" element={<Groups />} />
             <Route path="/users" element={<Users />} />
@@ -90,7 +93,7 @@ function AppRoutes() {
         )}
         
         {/* Mentor Routes */}
-        {profile?.role === 'mentor' && (
+        {effectiveRole === 'mentor' && (
           <>
             <Route path="/mentor-kit" element={<MentorKit />} />
             <Route path="/feedback" element={<Feedback />} />
