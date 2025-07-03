@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   MessageSquare, 
@@ -11,6 +13,23 @@ import {
 } from 'lucide-react';
 
 export default function Group() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleGroupChat = () => {
+    navigate('/group-chat');
+  };
+
+  const handleJoinMeeting = () => {
+    // Simulate joining a meeting
+    toast({
+      title: "Meeting Starting",
+      description: "Opening Google Meet for your group session...",
+    });
+    // In a real app, this would open the meeting URL
+    window.open('https://meet.google.com/', '_blank');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -20,7 +39,7 @@ export default function Group() {
             Your mentorship group for career development and growth
           </p>
         </div>
-        <Button className="bg-gradient-primary">
+        <Button className="bg-gradient-primary" onClick={handleGroupChat}>
           <MessageSquare className="w-4 h-4 mr-2" />
           Group Chat
         </Button>
@@ -85,7 +104,7 @@ export default function Group() {
               <div className="text-center">
                 <p className="text-lg font-semibold text-foreground">Wednesday, Jan 15</p>
                 <p className="text-sm text-muted-foreground">6:00 PM EST</p>
-                <Button className="w-full mt-4 bg-gradient-primary">
+                <Button className="w-full mt-4 bg-gradient-primary" onClick={handleJoinMeeting}>
                   Join Meeting
                 </Button>
               </div>

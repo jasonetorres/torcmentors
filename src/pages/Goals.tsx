@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Target, 
   Plus,
@@ -27,13 +28,14 @@ import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Goals() {
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('active');
 
   const isMentor = profile?.role === 'mentor';
 
   // Mock additional goals for mentees
-  const allGoals = [
+  const [allGoals, setAllGoals] = useState([
     ...mockGoals,
     {
       id: 'goal-2',
@@ -85,7 +87,55 @@ export default function Goals() {
       ],
       mentorNotes: 'Great improvement in feedback quality. Focus on being more specific.'
     }
-  ];
+  ]);
+
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    description: '',
+    category: 'technical' as 'technical' | 'career' | 'personal',
+    priority: 'medium' as 'high' | 'medium' | 'low',
+    targetDate: ''
+  });
+
+  const handleCreateGoal = () => {
+    if (!newGoal.title.trim() || !newGoal.description.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const goal = {
+      id: `goal-${Date.now()}`,
+      userId: user?.id || 'current-user',
+      title: newGoal.title,
+      description: newGoal.description,
+      category: newGoal.category,
+      priority: newGoal.priority,
+      status: 'pending' as const,
+      targetDate: newGoal.targetDate ? new Date(newGoal.targetDate) : new Date(),
+      createdAt: new Date(),
+      progress: 0,
+      milestones: []
+    };
+
+    setAllGoals([...allGoals, goal]);
+    setNewGoal({
+      title: '',
+      description: '',
+      category: 'technical',
+      priority: 'medium',
+      targetDate: ''
+    });
+    setIsCreateDialogOpen(false);
+
+    toast({
+      title: "Goal Created",
+      description: "Your new goal has been added successfully.",
+    });
+  };
 
   const stats = [
     { 
@@ -175,54 +225,69 @@ export default function Goals() {
                 Set a SMART goal to track your progress and achievements
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="title">Goal Title</Label>
-                <Input id="title" placeholder="e.g., Master React Hooks" />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Describe what you want to achieve..." />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technical">Technical</SelectItem>
-                      <SelectItem value="career">Career</SelectItem>
-                      <SelectItem value="personal">Personal</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="title">Goal Title</Label>
+                  <Input 
+                    id="title" 
+                    placeholder="e.g., Master React Hooks"
+                    value={newGoal.title}
+                    onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea 
+                    id="description" 
+                    placeholder="Describe what you want to achieve..."
+                    value={newGoal.description}
+                    onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={newGoal.category} onValueChange={(value: 'technical' | 'career' | 'personal') => setNewGoal({...newGoal, category: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="career">Career</SelectItem>
+                        <SelectItem value="personal">Personal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select value={newGoal.priority} onValueChange={(value: 'high' | 'medium' | 'low') => setNewGoal({...newGoal, priority: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="target-date">Target Date</Label>
+                  <Input 
+                    id="target-date" 
+                    type="date"
+                    value={newGoal.targetDate}
+                    onChange={(e) => setNewGoal({...newGoal, targetDate: e.target.value})}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button className="flex-1 bg-gradient-primary" onClick={handleCreateGoal}>Create Goal</Button>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancel
+                  </Button>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="target-date">Target Date</Label>
-                <Input id="target-date" type="date" />
-              </div>
-              <div className="flex gap-2">
-                <Button className="flex-1 bg-gradient-primary">Create Goal</Button>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
           </DialogContent>
         </Dialog>
       </div>
