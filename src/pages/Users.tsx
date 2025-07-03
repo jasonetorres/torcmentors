@@ -67,9 +67,9 @@ export default function UsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*');
+        
+        // Call our edge function to get users with emails
+        const { data, error } = await supabase.functions.invoke('get-users-with-emails');
 
         if (error) {
           console.error('Error fetching users:', error);
@@ -78,17 +78,23 @@ export default function UsersPage() {
             description: "Failed to fetch users",
             variant: "destructive"
           });
+        } else if (data?.success) {
+          setUsers(data.users as AppUser[]);
         } else {
-          // For now, we'll show users without emails since we can't access auth.admin from client
-          // The emails would need to be fetched server-side or stored in profiles
-          const usersWithPlaceholderEmails = (data || []).map(profile => ({
-            ...profile,
-            email: 'Email not available (requires server-side access)'
-          }));
-          setUsers(usersWithPlaceholderEmails as AppUser[]);
+          console.error('Function returned error:', data?.error);
+          toast({
+            title: "Error",
+            description: data?.error || "Failed to fetch users",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch users",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
