@@ -3,7 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import { 
   BookOpen, 
   FileText, 
@@ -15,24 +20,69 @@ import {
   Star,
   Clock,
   Eye,
-  Plus
+  Plus,
+  Edit,
+  Trash2,
+  Upload,
+  Calendar
 } from 'lucide-react';
-import { mockResources } from '@/data/mockData';
 import { ProgramPhase } from '@/types';
 
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  type: 'document' | 'video' | 'link' | 'template';
+  phase: ProgramPhase;
+  category: string;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  isPublic: boolean;
+  estimatedReadTime?: number;
+  url?: string;
+}
+
 export default function Resources() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPhase, setSelectedPhase] = useState<ProgramPhase | 'all'>('all');
-
-  // Mock additional resources
-  const allResources = [
-    ...mockResources,
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [resources, setResources] = useState<Resource[]>([
+    {
+      id: 'resource-1',
+      title: 'SMART Goal Setting Framework',
+      description: 'Complete guide for setting and tracking SMART goals with templates and examples',
+      type: 'document',
+      phase: 'phase1',
+      category: 'Goal Setting',
+      tags: ['goals', 'planning', 'framework'],
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01'),
+      isPublic: true,
+      estimatedReadTime: 15,
+      url: '/resources/smart-goals.pdf'
+    },
+    {
+      id: 'resource-2',
+      title: 'React Fundamentals Workshop',
+      description: 'Interactive video series covering React basics, hooks, and component patterns',
+      type: 'video',
+      phase: 'phase2',
+      category: 'Technical Skills',
+      tags: ['react', 'javascript', 'frontend'],
+      createdAt: new Date('2025-01-02'),
+      updatedAt: new Date('2025-01-02'),
+      isPublic: true,
+      estimatedReadTime: 120,
+      url: 'https://youtube.com/watch?v=example'
+    },
     {
       id: 'resource-3',
       title: 'Effective Communication in Tech',
       description: 'Slide deck outline for leading discussions on communication and feedback',
-      type: 'document' as const,
-      phase: 'phase2' as ProgramPhase,
+      type: 'document',
+      phase: 'phase2',
       category: 'Communication',
       tags: ['communication', 'feedback', 'soft-skills'],
       createdAt: new Date('2025-01-01'),
@@ -44,50 +94,86 @@ export default function Resources() {
       id: 'resource-4',
       title: 'Career Path Reflector Worksheet',
       description: 'Guided worksheet to help mentees explore different career paths and opportunities',
-      type: 'template' as const,
-      phase: 'phase2' as ProgramPhase,
+      type: 'template',
+      phase: 'phase2',
       category: 'Career Development',
       tags: ['career', 'worksheet', 'reflection'],
-      createdAt: new Date('2025-01-01'),
-      updatedAt: new Date('2025-01-01'),
+      createdAt: new Date('2025-01-03'),
+      updatedAt: new Date('2025-01-03'),
       isPublic: true,
-      estimatedReadTime: 25
-    },
-    {
-      id: 'resource-5',
-      title: 'System Design Challenge',
-      description: 'Complex technical challenge for whiteboarding sessions with solution guide',
-      type: 'case-study' as const,
-      phase: 'phase3' as ProgramPhase,
-      category: 'Technical Skills',
-      tags: ['system-design', 'whiteboarding', 'technical'],
-      createdAt: new Date('2025-01-01'),
-      updatedAt: new Date('2025-01-01'),
-      isPublic: false,
       estimatedReadTime: 45
-    },
-    {
-      id: 'resource-6',
-      title: 'Introduction to Mentorship Guide',
-      description: 'Welcome guide explaining the program structure and expectations',
-      type: 'document' as const,
-      phase: 'phase1' as ProgramPhase,
-      category: 'Program Introduction',
-      tags: ['intro', 'guide', 'overview'],
-      createdAt: new Date('2025-01-01'),
-      updatedAt: new Date('2025-01-01'),
-      isPublic: true,
-      estimatedReadTime: 15
     }
-  ];
+  ]);
+
+  const [newResource, setNewResource] = useState({
+    title: '',
+    description: '',
+    type: 'document' as Resource['type'],
+    phase: 'phase1' as ProgramPhase,
+    category: '',
+    tags: '',
+    url: '',
+    isPublic: true
+  });
+
+  const handleCreateResource = () => {
+    if (!newResource.title.trim() || !newResource.description.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const resource: Resource = {
+      id: `resource-${Date.now()}`,
+      title: newResource.title,
+      description: newResource.description,
+      type: newResource.type,
+      phase: newResource.phase,
+      category: newResource.category,
+      tags: newResource.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isPublic: newResource.isPublic,
+      url: newResource.url || undefined,
+      estimatedReadTime: Math.ceil(Math.random() * 60) + 10
+    };
+
+    setResources([...resources, resource]);
+    setNewResource({
+      title: '',
+      description: '',
+      type: 'document',
+      phase: 'phase1',
+      category: '',
+      tags: '',
+      url: '',
+      isPublic: true
+    });
+    setIsCreateDialogOpen(false);
+
+    toast({
+      title: "Resource Created",
+      description: "New resource has been added successfully.",
+    });
+  };
+
+  const handleDeleteResource = (resourceId: string) => {
+    setResources(resources.filter(resource => resource.id !== resourceId));
+    toast({
+      title: "Resource Deleted",
+      description: "Resource has been removed successfully.",
+    });
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'document': return FileText;
-      case 'document': return FileText;
+      case 'video': return Video;
       case 'link': return LinkIcon;
-      case 'template': return FileText;
-      case 'case-study': return BookOpen;
+      case 'template': return BookOpen;
       default: return FileText;
     }
   };
@@ -95,15 +181,14 @@ export default function Resources() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'document': return 'bg-primary/20 text-primary border-primary/30';
-      case 'document': return 'bg-primary/20 text-primary border-primary/30';
+      case 'video': return 'bg-accent/20 text-accent border-accent/30';
       case 'link': return 'bg-success/20 text-success border-success/30';
       case 'template': return 'bg-warning/20 text-warning border-warning/30';
-      case 'case-study': return 'bg-secondary text-secondary-foreground';
       default: return 'bg-secondary text-secondary-foreground';
     }
   };
 
-  const getPhaseColor = (phase: ProgramPhase) => {
+  const getPhaseColor = (phase: string) => {
     switch (phase) {
       case 'phase1': return 'bg-primary/20 text-primary border-primary/30';
       case 'phase2': return 'bg-accent/20 text-accent border-accent/30';
@@ -113,7 +198,7 @@ export default function Resources() {
     }
   };
 
-  const filteredResources = allResources.filter(resource => {
+  const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -121,13 +206,12 @@ export default function Resources() {
     return matchesSearch && matchesPhase;
   });
 
-  const resourcesByCategory = filteredResources.reduce((acc, resource) => {
-    if (!acc[resource.category]) {
-      acc[resource.category] = [];
-    }
-    acc[resource.category].push(resource);
-    return acc;
-  }, {} as Record<string, typeof allResources>);
+  const stats = [
+    { title: "Total Resources", value: resources.length.toString(), change: "+5 this month", icon: BookOpen, color: "text-primary" },
+    { title: "Public Resources", value: resources.filter(r => r.isPublic).length.toString(), change: "accessible to all", icon: Eye, color: "text-success" },
+    { title: "Video Content", value: resources.filter(r => r.type === 'video').length.toString(), change: "hours of content", icon: Video, color: "text-accent" },
+    { title: "Categories", value: new Set(resources.map(r => r.category)).size.toString(), change: "organized topics", icon: Filter, color: "text-warning" }
+  ];
 
   return (
     <div className="space-y-6">
@@ -136,23 +220,115 @@ export default function Resources() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Resource Library</h1>
           <p className="text-muted-foreground mt-2">
-            Access mentoring materials, templates, and learning resources
+            Manage learning materials, guides, and tools for mentorship program
           </p>
         </div>
-        <Button className="bg-gradient-primary">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Resource
-        </Button>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-primary">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Resource
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Resource</DialogTitle>
+              <DialogDescription>
+                Create a new learning resource for the mentorship program
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="resourceTitle">Resource Title</Label>
+                <Input 
+                  id="resourceTitle" 
+                  placeholder="e.g., React Best Practices Guide"
+                  value={newResource.title}
+                  onChange={(e) => setNewResource({...newResource, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="resourceDescription">Description</Label>
+                <Textarea 
+                  id="resourceDescription" 
+                  placeholder="Describe what this resource covers..."
+                  value={newResource.description}
+                  onChange={(e) => setNewResource({...newResource, description: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="resourceType">Type</Label>
+                  <Select value={newResource.type} onValueChange={(value: Resource['type']) => setNewResource({...newResource, type: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="document">Document</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="link">Link</SelectItem>
+                      <SelectItem value="template">Template</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="resourcePhase">Phase</Label>
+                  <Select value={newResource.phase} onValueChange={(value: ProgramPhase) => setNewResource({...newResource, phase: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select phase" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="phase1">Phase 1</SelectItem>
+                      <SelectItem value="phase2">Phase 2</SelectItem>
+                      <SelectItem value="phase3">Phase 3</SelectItem>
+                      <SelectItem value="phase4">Phase 4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="resourceCategory">Category</Label>
+                <Input 
+                  id="resourceCategory" 
+                  placeholder="e.g., Technical Skills"
+                  value={newResource.category}
+                  onChange={(e) => setNewResource({...newResource, category: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="resourceTags">Tags (comma-separated)</Label>
+                <Input 
+                  id="resourceTags" 
+                  placeholder="e.g., react, javascript, frontend"
+                  value={newResource.tags}
+                  onChange={(e) => setNewResource({...newResource, tags: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="resourceUrl">URL (optional)</Label>
+                <Input 
+                  id="resourceUrl" 
+                  placeholder="https://example.com/resource"
+                  value={newResource.url}
+                  onChange={(e) => setNewResource({...newResource, url: e.target.value})}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-gradient-primary" onClick={handleCreateResource}>
+                  Add Resource
+                </Button>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          { title: "Total Resources", value: "156", icon: BookOpen, color: "text-primary" },
-          { title: "Templates", value: "42", icon: FileText, color: "text-accent" },
-          { title: "Documents", value: "28", icon: FileText, color: "text-success" },
-          { title: "Case Studies", value: "15", icon: Star, color: "text-warning" }
-        ].map((stat) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat) => (
           <Card key={stat.title} className="bg-gradient-card border-border shadow-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -162,6 +338,9 @@ export default function Resources() {
                   </p>
                   <p className="text-2xl font-bold text-foreground">
                     {stat.value}
+                  </p>
+                  <p className={`text-xs ${stat.color} mt-1`}>
+                    {stat.change}
                   </p>
                 </div>
                 <div className={`p-3 rounded-lg bg-secondary ${stat.color}`}>
@@ -173,231 +352,147 @@ export default function Resources() {
         ))}
       </div>
 
-      {/* Search and Filters */}
+      {/* Search and Filter */}
       <Card className="bg-gradient-card border-border shadow-card">
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search resources, templates, and guides..."
+                placeholder="Search resources by title, description, or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                variant={selectedPhase === 'all' ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedPhase('all')}
-                className={selectedPhase === 'all' ? "bg-gradient-primary" : ""}
-              >
-                All Phases
-              </Button>
-              {(['phase1', 'phase2', 'phase3', 'phase4'] as ProgramPhase[]).map((phase) => (
-                <Button
-                  key={phase}
-                  variant={selectedPhase === phase ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedPhase(phase)}
-                  className={selectedPhase === phase ? "bg-gradient-primary" : ""}
-                >
-                  {phase}
-                </Button>
-              ))}
-            </div>
+            <Select value={selectedPhase} onValueChange={(value: ProgramPhase | 'all') => setSelectedPhase(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by phase" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Phases</SelectItem>
+                <SelectItem value="phase1">Phase 1</SelectItem>
+                <SelectItem value="phase2">Phase 2</SelectItem>
+                <SelectItem value="phase3">Phase 3</SelectItem>
+                <SelectItem value="phase4">Phase 4</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Resources */}
-      <Tabs defaultValue="all" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-secondary">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="guides">Guides</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="case-studies">Case Studies</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-8">
-          {Object.entries(resourcesByCategory).map(([category, resources]) => (
-            <div key={category} className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                {category}
-                <Badge variant="secondary" className="ml-2">
-                  {resources.length}
-                </Badge>
-              </h2>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {resources.map((resource) => {
-                  const IconComponent = getTypeIcon(resource.type);
-                  return (
-                    <Card key={resource.id} className="bg-gradient-card border-border shadow-card hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getTypeColor(resource.type).split(' ')[0]}`}>
-                              <IconComponent className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1">
-                              <CardTitle className="text-lg line-clamp-2">{resource.title}</CardTitle>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Badge variant="outline" className={getPhaseColor(resource.phase)}>
-                              {resource.phase}
-                            </Badge>
-                            <Badge variant="secondary" className={getTypeColor(resource.type)}>
-                              {resource.type}
-                            </Badge>
-                          </div>
-                        </div>
-                        <CardDescription className="line-clamp-2">
-                          {resource.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Clock className="w-4 h-4" />
-                              <span>{resource.estimatedReadTime}m</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Eye className="w-4 h-4" />
-                              <span>24 views</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-warning fill-current" />
-                            <span className="text-sm font-medium">4.8</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1">
-                          {resource.tags.slice(0, 3).map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {resource.tags.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{resource.tags.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="templates">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredResources.filter(r => r.type === 'template').map((resource) => (
-              <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-warning" />
-                    {resource.title}
-                  </CardTitle>
-                  <CardDescription>{resource.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full bg-gradient-primary">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Template
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="guides">
-          <div className="space-y-4">
-            {filteredResources.filter(r => r.type === 'document').map((resource) => (
-              <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{resource.title}</h3>
-                        <p className="text-sm text-muted-foreground">{resource.description}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span>{resource.estimatedReadTime} min read</span>
-                          <span>Updated {resource.updatedAt.toLocaleDateString()}</span>
-                        </div>
-                      </div>
+      {/* Resources List */}
+      <div className="grid gap-6">
+        {filteredResources.map((resource) => {
+          const TypeIcon = getTypeIcon(resource.type);
+          return (
+            <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${getTypeColor(resource.type)}`}>
+                      <TypeIcon className="w-5 h-5" />
                     </div>
-                    <Button variant="outline">
-                      View Guide
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-
-        <TabsContent value="case-studies">
-          <div className="space-y-6">
-            {filteredResources.filter(r => r.type === 'case-study').map((resource) => (
-              <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-primary" />
-                        {resource.title}
-                      </CardTitle>
-                      <CardDescription className="mt-2">{resource.description}</CardDescription>
+                      <CardTitle className="text-xl">{resource.title}</CardTitle>
+                      <CardDescription>{resource.category}</CardDescription>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Badge variant="outline" className={getPhaseColor(resource.phase)}>
                       {resource.phase}
                     </Badge>
+                    <Badge variant="secondary" className={getTypeColor(resource.type)}>
+                      {resource.type}
+                    </Badge>
+                    {resource.isPublic && (
+                      <Badge variant="outline" className="border-success text-success">
+                        Public
+                      </Badge>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{resource.estimatedReadTime} minutes</span>
-                      <span>Advanced level</span>
-                      <span>Includes solution guide</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{resource.description}</p>
+                
+                <div className="flex flex-wrap gap-2">
+                  {resource.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    {resource.estimatedReadTime && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {resource.estimatedReadTime} min
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {resource.createdAt.toLocaleDateString()}
                     </div>
-                    <Button variant="outline">
-                      View Case Study
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View
+                  </Button>
+                  {resource.url && (
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteResource(resource.id)}
+                    className="text-destructive hover:bg-destructive/20"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Bulk Actions */}
+      <Card className="bg-gradient-card border-border shadow-card">
+        <CardHeader>
+          <CardTitle>Bulk Resource Management</CardTitle>
+          <CardDescription>Import and manage resources in bulk</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Button variant="outline">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Files
+            </Button>
+            <Button variant="outline">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Import from Library
+            </Button>
+            <Button variant="outline">
+              <Star className="w-4 h-4 mr-2" />
+              Featured Resources
+            </Button>
           </div>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }
