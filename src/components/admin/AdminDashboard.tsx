@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { 
   Users, 
   BookOpen, 
@@ -27,12 +28,21 @@ import { useToast } from '@/hooks/use-toast';
 export function AdminDashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
+  const [isProgramSettingsOpen, setIsProgramSettingsOpen] = useState(false);
   const [newResource, setNewResource] = useState({
     title: '',
     description: '',
     type: 'guide',
     phase: 'phase1',
     estimatedReadTime: 10
+  });
+  const [programSettings, setProgramSettings] = useState({
+    programName: 'Torc Mentorship Program',
+    programDuration: '12',
+    autoAssignGroups: true,
+    maxGroupSize: '6',
+    emailNotifications: true,
+    allowMenteeGroupSwitch: false
   });
   const { toast } = useToast();
 
@@ -61,6 +71,15 @@ export function AdminDashboard() {
       estimatedReadTime: 10
     });
     setIsAddResourceOpen(false);
+  };
+
+  const handleSaveProgramSettings = () => {
+    // Here you would typically save to database
+    toast({
+      title: "Settings Saved",
+      description: "Program settings have been updated successfully.",
+    });
+    setIsProgramSettingsOpen(false);
   };
 
   const stats = [
@@ -109,10 +128,86 @@ export function AdminDashboard() {
             <FileText className="w-4 h-4 mr-2" />
             Export Report
           </Button>
-          <Button size="sm" className="bg-gradient-primary">
-            <Settings className="w-4 h-4 mr-2" />
-            Program Settings
-          </Button>
+          <Dialog open={isProgramSettingsOpen} onOpenChange={setIsProgramSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="bg-gradient-primary">
+                <Settings className="w-4 h-4 mr-2" />
+                Program Settings
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Program Settings</DialogTitle>
+                <DialogDescription>
+                  Configure your mentorship program settings
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="programName">Program Name</Label>
+                  <Input 
+                    id="programName" 
+                    value={programSettings.programName}
+                    onChange={(e) => setProgramSettings({...programSettings, programName: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="programDuration">Duration (weeks)</Label>
+                    <Input 
+                      id="programDuration" 
+                      type="number"
+                      value={programSettings.programDuration}
+                      onChange={(e) => setProgramSettings({...programSettings, programDuration: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="maxGroupSize">Max Group Size</Label>
+                    <Input 
+                      id="maxGroupSize" 
+                      type="number"
+                      value={programSettings.maxGroupSize}
+                      onChange={(e) => setProgramSettings({...programSettings, maxGroupSize: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="autoAssign">Auto-assign groups</Label>
+                    <Switch 
+                      id="autoAssign"
+                      checked={programSettings.autoAssignGroups}
+                      onCheckedChange={(checked) => setProgramSettings({...programSettings, autoAssignGroups: checked})}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="emailNotifs">Email notifications</Label>
+                    <Switch 
+                      id="emailNotifs"
+                      checked={programSettings.emailNotifications}
+                      onCheckedChange={(checked) => setProgramSettings({...programSettings, emailNotifications: checked})}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="groupSwitch">Allow mentee group switching</Label>
+                    <Switch 
+                      id="groupSwitch"
+                      checked={programSettings.allowMenteeGroupSwitch}
+                      onCheckedChange={(checked) => setProgramSettings({...programSettings, allowMenteeGroupSwitch: checked})}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="flex-1 bg-gradient-primary" onClick={handleSaveProgramSettings}>
+                    Save Settings
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsProgramSettingsOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
