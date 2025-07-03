@@ -241,7 +241,7 @@ export default function Auth() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Use MENTOR2025 for mentors or MENTEE2025 for mentees
+                      Reach out to jason@torc.dev for your code
                     </p>
                   </div>
 
