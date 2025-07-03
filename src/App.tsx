@@ -24,6 +24,7 @@ import Meetings from "./pages/Meetings";
 import Group from "./pages/Group";
 import Settings from "./pages/Settings";
 import Feedback from "./pages/Feedback";
+import AdminUserCreation from "./pages/AdminUserCreation";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
 
@@ -86,6 +87,7 @@ function AppRoutes() {
         {/* Admin Routes */}
         {effectiveRole === 'admin' && (
           <>
+            <Route path="/admin/create-users" element={<AdminUserCreation />} />
             <Route path="/groups" element={<Groups />} />
             <Route path="/users" element={<Users />} />
             <Route path="/analytics" element={<Analytics />} />
