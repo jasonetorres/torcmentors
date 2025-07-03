@@ -13,7 +13,6 @@ import {
   Send, 
   Users,
   Plus,
-  Search,
   Pin,
   Paperclip,
   Smile,
@@ -49,7 +48,6 @@ export default function Communication() {
   const { user, profile } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [newMessage, setNewMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [channels, setChannels] = useState<Channel[]>([
     {
@@ -201,22 +199,13 @@ export default function Communication() {
       {/* Desktop: Sidebar - Channels */}
       <div className="hidden lg:block w-80 bg-gradient-card border border-border rounded-lg shadow-card">
         <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Channels</h2>
             {isMentor && (
               <Button size="sm" variant="outline" onClick={handleCreateChannel}>
                 <Plus className="w-4 h-4" />
               </Button>
             )}
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search channels..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
           </div>
         </div>
 
