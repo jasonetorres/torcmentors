@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Calendar, 
   Clock, 
@@ -29,10 +31,12 @@ interface Meeting {
   attendees: number;
   status: 'upcoming' | 'completed' | 'cancelled';
   meetingUrl?: string;
+  assignedTo?: string;
 }
 
 export default function Meetings() {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [meetings, setMeetings] = useState<Meeting[]>([
     {
@@ -73,10 +77,35 @@ export default function Meetings() {
     description: '',
     date: '',
     time: '',
-    duration: '60'
+    duration: '60',
+    assignedTo: '' // Add this for group member assignment
   });
 
-  const handleCreateMeeting = () => {
+  // Mock group members - in real app, fetch from backend
+  const groupMembers = [
+    { id: '1', name: 'Alice Johnson', role: 'mentee', email: 'alice@example.com' },
+    { id: '2', name: 'Bob Smith', role: 'mentee', email: 'bob@example.com' },
+    { id: '3', name: 'Sarah Chen', role: 'mentor', email: 'sarah@example.com' },
+    { id: '4', name: 'Mike Rodriguez', role: 'mentor', email: 'mike@example.com' }
+  ];
+
+  const sendNotificationEmail = async (type: string, recipientEmail: string, recipientName: string, data: any) => {
+    try {
+      await supabase.functions.invoke('send-notification', {
+        body: {
+          type,
+          recipient_email: recipientEmail,
+          recipient_name: recipientName,
+          sender_name: profile?.display_name || 'Team Member',
+          data
+        }
+      });
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+    }
+  };
+
+  const handleCreateMeeting = async () => {
     if (!newMeeting.title.trim() || !newMeeting.date || !newMeeting.time) {
       toast({
         title: "Error",
@@ -99,22 +128,39 @@ export default function Meetings() {
       duration: `${newMeeting.duration} minutes`,
       attendees: 2,
       status: 'upcoming',
-      meetingUrl: `https://meet.google.com/${Math.random().toString(36).substr(2, 12)}`
+      meetingUrl: `https://meet.google.com/${Math.random().toString(36).substr(2, 12)}`,
+      assignedTo: newMeeting.assignedTo
     };
 
     setMeetings([...meetings, meeting]);
+
+    // Send email notification if meeting is assigned to someone
+    if (newMeeting.assignedTo) {
+      const assignedMember = groupMembers.find(m => m.id === newMeeting.assignedTo);
+      if (assignedMember) {
+        await sendNotificationEmail('meeting_assigned', assignedMember.email, assignedMember.name, {
+          title: newMeeting.title,
+          message: newMeeting.description,
+          meeting_date: newMeeting.date,
+          meeting_time: newMeeting.time,
+          group_name: 'Your Mentorship Group'
+        });
+      }
+    }
+
     setNewMeeting({
       title: '',
       description: '',
       date: '',
       time: '',
-      duration: '60'
+      duration: '60',
+      assignedTo: ''
     });
     setIsCreateDialogOpen(false);
 
     toast({
-      title: "Meeting Scheduled",
-      description: "New meeting has been created successfully.",
+      title: "Meeting Created",
+      description: newMeeting.assignedTo ? "Meeting created and notification sent!" : "Meeting created successfully.",
     });
   };
 
@@ -225,6 +271,21 @@ export default function Meetings() {
                     <SelectItem value="60">60 minutes</SelectItem>
                     <SelectItem value="90">90 minutes</SelectItem>
                     <SelectItem value="120">120 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="assignTo">Assign to Group Member (Optional)</Label>
+                <Select value={newMeeting.assignedTo} onValueChange={(value) => setNewMeeting({...newMeeting, assignedTo: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a group member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groupMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name} ({member.role})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
