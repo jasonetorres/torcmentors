@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,7 @@ export default function AccountSetup() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { updateProfile, user, profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -139,6 +141,11 @@ export default function AccountSetup() {
         title: "Account Setup Complete",
         description: "Welcome to the Torc Mentorship Program!",
       });
+      
+      // Navigate to dashboard after successful setup
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     } catch (error) {
       toast({
         title: "Setup Failed",
