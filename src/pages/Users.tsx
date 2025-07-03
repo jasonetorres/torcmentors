@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Users, 
   UserPlus, 
@@ -28,15 +29,20 @@ import { UserRole } from '@/types';
 
 interface AppUser {
   id: string;
-  name: string;
-  email: string;
+  user_id: string;
+  display_name: string;
+  email?: string;
   role: UserRole;
-  avatar: string;
-  bio: string;
-  isOnboardingComplete: boolean;
-  lastActive: Date;
-  experience: string;
-  createdAt: Date;
+  avatar_url: string | null;
+  bio: string | null;
+  is_onboarding_complete: boolean;
+  created_at: string;
+  updated_at: string;
+  experience: string | null;
+  skills: string[] | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  discord_username: string | null;
 }
 
 export default function UsersPage() {
@@ -45,6 +51,7 @@ export default function UsersPage() {
   const [selectedRole, setSelectedRole] = useState<'all' | UserRole>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [newUser, setNewUser] = useState({
     name: '',
@@ -52,6 +59,35 @@ export default function UsersPage() {
     role: 'mentee' as UserRole,
     bio: ''
   });
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch users",
+            variant: "destructive"
+          });
+        } else {
+          setUsers((data || []) as AppUser[]);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleCreateUser = () => {
     if (!newUser.name.trim() || !newUser.email.trim()) {
@@ -65,15 +101,19 @@ export default function UsersPage() {
 
     const user: AppUser = {
       id: `user-${Date.now()}`,
-      name: newUser.name,
-      email: newUser.email,
+      user_id: `user-${Date.now()}`,
+      display_name: newUser.name,
       role: newUser.role,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face',
+      avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face',
       bio: newUser.bio,
-      isOnboardingComplete: false,
-      lastActive: new Date(),
+      is_onboarding_complete: false,
       experience: newUser.role === 'mentor' ? 'Senior Level' : 'Entry Level',
-      createdAt: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      skills: null,
+      linkedin_url: null,
+      github_url: null,
+      discord_username: null
     };
 
     setUsers([...users, user]);
@@ -103,7 +143,7 @@ export default function UsersPage() {
     { title: "Total Users", value: users.length.toString(), change: "", icon: Users, color: "text-primary" },
     { title: "Active Mentors", value: users.filter(u => u.role === 'mentor').length.toString(), change: "", icon: GraduationCap, color: "text-success" },
     { title: "Learning Mentees", value: users.filter(u => u.role === 'mentee').length.toString(), change: "", icon: Star, color: "text-accent" },
-    { title: "Pending Onboarding", value: users.filter(u => !u.isOnboardingComplete).length.toString(), change: "", icon: Clock, color: "text-warning" }
+    { title: "Pending Onboarding", value: users.filter(u => !u.is_onboarding_complete).length.toString(), change: "", icon: Clock, color: "text-warning" }
   ];
 
   const getRoleColor = (role: UserRole) => {
@@ -122,8 +162,8 @@ export default function UsersPage() {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (user.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (user.user_id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     return matchesSearch && matchesRole;
   });
@@ -262,30 +302,48 @@ export default function UsersPage() {
       </Card>
 
       {/* Users List */}
+      {loading ? (
+        <div className="text-center py-8">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading users...</p>
+        </div>
+      ) : (
       <div className="grid gap-6">
-        {filteredUsers.map((user) => (
+        {filteredUsers.length === 0 ? (
+          <Card className="bg-gradient-card border-border shadow-card">
+            <CardContent className="p-8 text-center">
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No users found</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchQuery || selectedRole !== 'all' 
+                  ? 'Try adjusting your search filters' 
+                  : 'Get started by creating your first user'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredUsers.map((user) => (
           <Card key={user.id} className="bg-gradient-card border-border shadow-card">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <img 
-                    src={user.avatar}
-                    alt={user.name}
+                    src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face'}
+                    alt={user.display_name || 'User'}
                     className="w-12 h-12 rounded-full border-2 border-border"
                   />
-                  {user.lastActive && new Date(user.lastActive).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background" />
-                  )}
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background" />
                 </div>
                 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="font-semibold text-foreground">{user.name}</h3>
+                    <h3 className="font-semibold text-foreground">{user.display_name || 'Unnamed User'}</h3>
                     <Badge variant="secondary" className={getRoleColor(user.role)}>
                       {user.role}
                     </Badge>
-                    <Badge variant="outline" className={getOnboardingColor(user.isOnboardingComplete)}>
-                      {user.isOnboardingComplete ? (
+                    <Badge variant="outline" className={getOnboardingColor(user.is_onboarding_complete)}>
+                      {user.is_onboarding_complete ? (
                         <><CheckCircle className="w-3 h-3 mr-1" /> Complete</>
                       ) : (
                         <><AlertCircle className="w-3 h-3 mr-1" /> Pending</>
@@ -293,7 +351,7 @@ export default function UsersPage() {
                     </Badge>
                   </div>
                   
-                  <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{user.user_id}</p>
                   
                   {user.bio && (
                     <p className="text-sm text-muted-foreground mb-2">{user.bio}</p>
@@ -302,14 +360,17 @@ export default function UsersPage() {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      Joined {user.createdAt.toLocaleDateString()}
+                      Joined {new Date(user.created_at).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      Last active {user.lastActive.toLocaleDateString()}
+                      Updated {new Date(user.updated_at).toLocaleDateString()}
                     </div>
                     {user.experience && (
                       <div>Experience: {user.experience}</div>
+                    )}
+                    {user.skills && user.skills.length > 0 && (
+                      <div>Skills: {user.skills.slice(0, 2).join(', ')}{user.skills.length > 2 ? '...' : ''}</div>
                     )}
                   </div>
                 </div>
@@ -336,8 +397,10 @@ export default function UsersPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
+      )}
 
       {/* User Import Section */}
       <Card className="bg-gradient-card border-border shadow-card">
