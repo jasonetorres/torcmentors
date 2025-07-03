@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { MentorKit, ProgramPhase } from '@/types';
 import { mentorKits } from '@/data/mentorKits';
+import { CreateContentDialog } from '@/components/mentor/CreateContentDialog';
 
 interface MentorKitViewerProps {
   phase: ProgramPhase;
@@ -170,7 +171,7 @@ export function MentorKitViewer({ phase, onMarkComplete }: MentorKitViewerProps)
                 <Lightbulb className="w-5 h-5 text-accent" />
                 Quick Actions
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <Button variant="outline" size="sm" className="justify-start">
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Meeting
@@ -183,6 +184,12 @@ export function MentorKitViewer({ phase, onMarkComplete }: MentorKitViewerProps)
                   <Download className="w-4 h-4 mr-2" />
                   Download Kit
                 </Button>
+                <CreateContentDialog>
+                  <Button variant="outline" size="sm" className="justify-start">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Create Content
+                  </Button>
+                </CreateContentDialog>
               </div>
             </CardContent>
           </Card>
@@ -328,7 +335,18 @@ export function MentorKitViewer({ phase, onMarkComplete }: MentorKitViewerProps)
                       <p className="text-xs text-muted-foreground">Ready-to-use template</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = template.downloadUrl;
+                          link.download = template.title;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -355,7 +373,11 @@ export function MentorKitViewer({ phase, onMarkComplete }: MentorKitViewerProps)
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(resource.url, '_blank')}
+                      >
                         View
                       </Button>
                     </div>
