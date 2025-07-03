@@ -74,11 +74,11 @@ export default function Auth() {
         <div className="space-y-8">
           <div className="text-center lg:text-left">
             <div className="flex items-center gap-3 justify-center lg:justify-start mb-6">
-              <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+              <div className="w-12 h-12 flex items-center justify-center">
                 <img 
                   src="/lovable-uploads/c47e68c8-1e93-4148-b3c0-b19b14b60826.png" 
                   alt="Torc Logo" 
-                  className="w-8 h-8"
+                  className="w-12 h-12"
                 />
               </div>
               <div>
