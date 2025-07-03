@@ -160,15 +160,18 @@ export default function Surveys() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Surveys</h1>
-            <p className="text-muted-foreground">Manage surveys and collect feedback from participants</p>
+            <p className="text-muted-foreground">
+              {isAdmin ? 'Manage surveys and collect feedback from participants' : 'View and respond to available surveys'}
+            </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-primary text-primary-foreground shadow-glow">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Survey
-              </Button>
-            </DialogTrigger>
+          {isAdmin && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-primary text-primary-foreground shadow-glow">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Survey
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Create New Survey</DialogTitle>
@@ -229,7 +232,8 @@ export default function Surveys() {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          )}
         </div>
 
         {/* Survey Stats */}
@@ -309,22 +313,37 @@ export default function Surveys() {
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewResults(survey)}
-                    >
-                      <BarChart3 className="w-4 h-4 mr-1" />
-                      View Results
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEditSurvey(survey)}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
+                    {isAdmin ? (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewResults(survey)}
+                        >
+                          <BarChart3 className="w-4 h-4 mr-1" />
+                          View Results
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditSurvey(survey)}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => toast({
+                          title: "Take Survey",
+                          description: `Opening survey: ${survey.title}`,
+                        })}
+                      >
+                        Take Survey
+                      </Button>
+                    )}
                     {isAdmin && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
