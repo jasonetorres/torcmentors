@@ -150,9 +150,9 @@ export default function Communication() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex gap-6">
+    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-6">
       {/* Sidebar - Channels */}
-      <div className="w-80 bg-gradient-card border border-border rounded-lg shadow-card">
+      <div className="w-full lg:w-80 bg-gradient-card border border-border rounded-lg shadow-card">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Channels</h2>
@@ -322,8 +322,8 @@ export default function Communication() {
         </div>
       </div>
 
-      {/* Right Sidebar - Online Members */}
-      <div className="w-64 bg-gradient-card border border-border rounded-lg shadow-card">
+      {/* Right Sidebar - Online Members - Hidden on mobile */}
+      <div className="hidden lg:block w-64 bg-gradient-card border border-border rounded-lg shadow-card">
         <div className="p-4 border-b border-border">
           <h3 className="font-semibold text-foreground">Group Members</h3>
           <p className="text-xs text-muted-foreground mt-1">Members will appear when you join a group</p>
