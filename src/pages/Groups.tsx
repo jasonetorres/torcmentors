@@ -77,6 +77,7 @@ export default function Groups() {
   const [selectedMentor, setSelectedMentor] = useState<string>('');
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingGroups, setLoadingGroups] = useState(true);
+  const [activeTab, setActiveTab] = useState('active');
 
   const [newGroup, setNewGroup] = useState({
     name: '',
@@ -87,10 +88,10 @@ export default function Groups() {
     schedule: ''
   });
 
-  // Fetch groups on component mount
+  // Fetch groups on component mount and when activeTab changes
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [activeTab]);
 
   const fetchGroups = async () => {
     setLoadingGroups(true);
@@ -118,6 +119,7 @@ export default function Groups() {
       }
 
       const allUsers = usersResponse?.success ? usersResponse.users : [];
+      setUsers(allUsers);
 
       // Process groups with member counts and mentor names
       const processedGroups = (groupsData || []).map(group => {
@@ -230,12 +232,55 @@ export default function Groups() {
     }
   };
 
-  const handleDeleteGroup = (groupId: string) => {
-    setGroups(groups.filter(group => group.id !== groupId));
-    toast({
-      title: "Group Deleted",
-      description: "Group has been removed successfully.",
-    });
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      // First, remove all users from this group
+      const { error: userUpdateError } = await supabase
+        .from('profiles')
+        .update({ group_id: null })
+        .eq('group_id', groupId);
+      
+      if (userUpdateError) {
+        console.error('Error removing users from group:', userUpdateError);
+        toast({
+          title: "Error",
+          description: "Failed to remove users from group",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Then delete the group
+      const { error: deleteError } = await supabase
+        .from('groups')
+        .delete()
+        .eq('id', groupId);
+        
+      if (deleteError) {
+        console.error('Error deleting group:', deleteError);
+        toast({
+          title: "Error",
+          description: "Failed to delete group",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Refresh the groups list
+      await fetchGroups();
+      
+      toast({
+        title: "Group Deleted",
+        description: "Group has been removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete group",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleEditGroup = (group: Group) => {
@@ -251,7 +296,7 @@ export default function Groups() {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateGroup = () => {
+  const handleUpdateGroup = async () => {
     if (!editingGroup || !newGroup.name.trim() || !newGroup.description.trim()) {
       toast({
         title: "Error",
@@ -261,37 +306,55 @@ export default function Groups() {
       return;
     }
 
-    const updatedGroups = groups.map(group => 
-      group.id === editingGroup.id 
-        ? {
-            ...group,
-            name: newGroup.name,
-            description: newGroup.description,
-            phase: newGroup.phase,
-            mentorId: newGroup.mentorId || 'unassigned',
-            mentorName: newGroup.mentorId ? 'Assigned Mentor' : 'Unassigned',
-            maxSize: parseInt(newGroup.maxSize),
-            schedule: newGroup.schedule
-          }
-        : group
-    );
+    try {
+      const { error } = await supabase
+        .from('groups')
+        .update({
+          name: newGroup.name,
+          description: newGroup.description,
+          phase: newGroup.phase,
+          mentor_id: newGroup.mentorId || null,
+          max_size: parseInt(newGroup.maxSize),
+          schedule: newGroup.schedule
+        })
+        .eq('id', editingGroup.id);
+        
+      if (error) {
+        console.error('Error updating group:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update group",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Refresh groups list
+      await fetchGroups();
+      
+      setEditingGroup(null);
+      setNewGroup({
+        name: '',
+        description: '',
+        phase: 'phase1',
+        mentorId: '',
+        maxSize: '4',
+        schedule: ''
+      });
+      setIsEditDialogOpen(false);
 
-    setGroups(updatedGroups);
-    setEditingGroup(null);
-    setNewGroup({
-      name: '',
-      description: '',
-      phase: 'phase1',
-      mentorId: '',
-      maxSize: '4',
-      schedule: ''
-    });
-    setIsEditDialogOpen(false);
-
-    toast({
-      title: "Group Updated",
-      description: "Group has been updated successfully.",
-    });
+      toast({
+        title: "Group Updated",
+        description: "Group has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating group:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update group",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleChatClick = (group: Group) => {
@@ -302,12 +365,14 @@ export default function Groups() {
   const handleAssignUsers = (group: Group) => {
     setAssigningGroup(group);
     setIsAssignDialogOpen(true);
+    // Make sure we have fresh user data
+    fetchUsers();
   };
 
   const stats = [
     { title: "Total Groups", value: groups.length.toString(), change: "Create your first group", icon: Users, color: "text-primary" },
     { title: "Active Groups", value: groups.filter(g => g.status === 'active').length.toString(), change: "No active groups yet", icon: Star, color: "text-success" },
-    { title: "Total Members", value: groups.reduce((sum, g) => sum + g.menteeCount, 0).toString(), change: "Invite members to groups", icon: UserPlus, color: "text-accent" },
+    { title: "Total Members", value: users.filter(u => u.group_id).length.toString(), change: "Invite members to groups", icon: UserPlus, color: "text-accent" },
     { title: "Program Progress", value: "0%", change: "Start your mentorship journey", icon: TrendingUp, color: "text-warning" }
   ];
 
@@ -469,112 +534,144 @@ export default function Groups() {
                 className="pl-10"
               />
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchGroups}
+              className="min-w-[100px]"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Groups List */}
-      <div className="grid gap-6">
-        {filteredGroups.map((group) => (
-          <Card key={group.id} className="bg-gradient-card border-border shadow-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">{group.name}</CardTitle>
-                  <CardDescription>Mentor: {group.mentorName}</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className={getStatusColor(group.status)}>
-                    {group.status}
-                  </Badge>
-                  <Badge variant="outline" className={getPhaseColor(group.phase)}>
-                    {group.phase}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">{group.description}</p>
-              
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Mentees</p>
-                  <p className="font-medium text-foreground">{group.menteeCount}/{group.maxSize}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Schedule</p>
-                  <p className="font-medium text-foreground">{group.schedule}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Created</p>
-                  <p className="font-medium text-foreground">{new Date(group.created_at).toLocaleDateString()}</p>
-                </div>
-              </div>
+      {loadingGroups ? (
+        <div className="text-center py-8">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading groups...</p>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {filteredGroups.length === 0 ? (
+            <Card className="bg-gradient-card border-border shadow-card">
+              <CardContent className="p-12 text-center">
+                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg font-medium text-foreground mb-2">No Groups Found</p>
+                <p className="text-muted-foreground mb-4">
+                  {searchQuery ? 'Try adjusting your search query' : 'Create your first mentor group to get started'}
+                </p>
+                <Button className="bg-gradient-primary" onClick={() => setIsCreateDialogOpen(true)}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create First Group
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredGroups.map((group) => (
+              <Card key={group.id} className="bg-gradient-card border-border shadow-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">{group.name}</CardTitle>
+                      <CardDescription>Mentor: {group.mentorName}</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className={getStatusColor(group.status)}>
+                        {group.status}
+                      </Badge>
+                      <Badge variant="outline" className={getPhaseColor(group.phase)}>
+                        {group.phase}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{group.description}</p>
+                  
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Mentees</p>
+                      <p className="font-medium text-foreground">{group.menteeCount}/{group.maxSize}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Schedule</p>
+                      <p className="font-medium text-foreground">{group.schedule}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Created</p>
+                      <p className="font-medium text-foreground">{new Date(group.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
 
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleEditGroup(group)}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleChatClick(group)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Chat
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleAssignUsers(group)}
-                >
-                  <UserCog className="w-4 h-4 mr-2" />
-                  Manage Users
-                </Button>
-                {profile?.role === 'admin' && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/20"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Group</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{group.name}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteGroup(group.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditGroup(group)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleChatClick(group)}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Chat
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleAssignUsers(group)}
+                    >
+                      <UserCog className="w-4 h-4 mr-2" />
+                      Manage Users
+                    </Button>
+                    {profile?.role === 'admin' && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-destructive hover:bg-destructive/20"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{group.name}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteGroup(group.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Tabs for additional management */}
-      <Tabs defaultValue="active" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 bg-secondary">
           <TabsTrigger value="active">Active Management</TabsTrigger>
           <TabsTrigger value="mentees">Mentee Assignment</TabsTrigger>
