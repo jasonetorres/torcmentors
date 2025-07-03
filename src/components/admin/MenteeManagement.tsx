@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,60 +27,144 @@ import {
   UserMinus
 } from 'lucide-react';
 
-import { User, Group } from '@/types';
 import { UserRole } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface AppUser {
+  id: string;
+  user_id: string;
+  display_name: string;
+  email?: string;
+  role: UserRole;
+  avatar_url: string | null;
+  bio: string | null;
+  group_id: string | null;
+  is_onboarding_complete: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function MenteeManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMentee, setSelectedMentee] = useState<string>('');
   const [targetGroup, setTargetGroup] = useState<string>('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const [users] = useState<User[]>([]);
-  const [groups] = useState<Group[]>([]);
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.functions.invoke('get-users-with-emails');
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch users",
+            variant: "destructive"
+          });
+        } else if (data?.success) {
+          setUsers(data.users as AppUser[]);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Get all mentees and their current group assignments
   const mentees = users.filter(user => user.role === 'mentee');
-  const unassignedMentees = mentees.filter(mentee => !mentee.groupId);
-  const assignedMentees = mentees.filter(mentee => mentee.groupId);
+  const unassignedMentees = mentees.filter(mentee => !mentee.group_id);
+  const assignedMentees = mentees.filter(mentee => mentee.group_id);
 
   const filteredMentees = mentees.filter(mentee =>
-    mentee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    mentee.email.toLowerCase().includes(searchQuery.toLowerCase())
+    (mentee.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (mentee.email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getGroupName = (groupId: string) => {
-    return groups.find(g => g.id === groupId)?.name || 'Unknown Group';
+    return `Group ${groupId}`;
   };
 
   const getMentorName = (groupId: string) => {
-    const group = groups.find(g => g.id === groupId);
-    if (!group) return 'Unknown Mentor';
-    return users.find(u => u.id === group.mentorId)?.name || 'Unknown Mentor';
+    return 'Mentor TBD';
   };
 
-  const handleAssignMentee = () => {
+  const handleAssignMentee = async () => {
     if (!selectedMentee || !targetGroup) return;
     
-    // In real app, would make API call
-    toast({
-      title: "Mentee Assigned",
-      description: `Successfully assigned mentee to ${getGroupName(targetGroup)}`,
-    });
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ group_id: targetGroup })
+        .eq('id', selectedMentee);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to assign mentee to group",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Mentee Assigned",
+          description: `Successfully assigned mentee to ${getGroupName(targetGroup)}`,
+        });
+        
+        // Refresh the users list
+        setUsers(users.map(user => 
+          user.id === selectedMentee 
+            ? { ...user, group_id: targetGroup }
+            : user
+        ));
+      }
+    } catch (error) {
+      console.error('Error assigning mentee:', error);
+    }
     
     setIsAssignDialogOpen(false);
     setSelectedMentee('');
     setTargetGroup('');
   };
 
-  const handleRemoveFromGroup = (menteeId: string) => {
-    // In real app, would make API call
-    toast({
-      title: "Mentee Removed",
-      description: "Mentee has been removed from their group",
-    });
+  const handleRemoveFromGroup = async (menteeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ group_id: null })
+        .eq('id', menteeId);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to remove mentee from group",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Mentee Removed",
+          description: "Mentee has been removed from their group",
+        });
+        
+        // Refresh the users list
+        setUsers(users.map(user => 
+          user.id === menteeId 
+            ? { ...user, group_id: null }
+            : user
+        ));
+      }
+    } catch (error) {
+      console.error('Error removing mentee from group:', error);
+    }
   };
 
   return (
@@ -114,7 +198,7 @@ export default function MenteeManagement() {
                   <SelectContent>
                     {unassignedMentees.map((mentee) => (
                       <SelectItem key={mentee.id} value={mentee.id}>
-                        {mentee.name} - {mentee.email}
+                        {mentee.display_name} - {mentee.email}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -128,11 +212,11 @@ export default function MenteeManagement() {
                     <SelectValue placeholder="Choose a group" />
                   </SelectTrigger>
                   <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name} - {getMentorName(group.id)}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="group-1">Group 1</SelectItem>
+                    <SelectItem value="group-2">Group 2</SelectItem>
+                    <SelectItem value="group-3">Group 3</SelectItem>
+                    <SelectItem value="group-4">Group 4</SelectItem>
+                    <SelectItem value="group-5">Group 5</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -225,18 +309,18 @@ export default function MenteeManagement() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <img
-                    src={mentee.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face'}
-                    alt={mentee.name}
+                    src={mentee.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face'}
+                    alt={mentee.display_name || 'User'}
                     className="w-12 h-12 rounded-full border-2 border-border"
                   />
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-foreground">{mentee.name}</h3>
+                      <h3 className="font-semibold text-foreground">{mentee.display_name || 'Unnamed User'}</h3>
                       <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                         Mentee
                       </Badge>
-                      {mentee.groupId ? (
+                      {mentee.group_id ? (
                         <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Assigned
@@ -251,13 +335,13 @@ export default function MenteeManagement() {
                     
                     <p className="text-sm text-muted-foreground mb-2">{mentee.email}</p>
                     
-                    {mentee.groupId && (
+                    {mentee.group_id && (
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">Group:</span>
-                        <span className="font-medium text-foreground">{getGroupName(mentee.groupId)}</span>
+                        <span className="font-medium text-foreground">{getGroupName(mentee.group_id)}</span>
                         <ArrowRight className="w-3 h-3 text-muted-foreground" />
                         <span className="text-muted-foreground">Mentor:</span>
-                        <span className="font-medium text-foreground">{getMentorName(mentee.groupId)}</span>
+                        <span className="font-medium text-foreground">{getMentorName(mentee.group_id)}</span>
                       </div>
                     )}
                     
@@ -268,7 +352,7 @@ export default function MenteeManagement() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {mentee.groupId ? (
+                  {mentee.group_id ? (
                     <Button 
                       variant="outline" 
                       size="sm"
