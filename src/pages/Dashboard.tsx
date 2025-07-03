@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,13 +18,13 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
-  if (user?.role === 'admin') {
+  if (profile?.role === 'admin') {
     return <AdminDashboard />;
   }
 
-  const isMentor = user?.role === 'mentor';
+  const isMentor = profile?.role === 'mentor';
 
   const stats = isMentor ? [
     { title: "Group Members", value: "3", change: "mentees", icon: Users, color: "text-primary" },
@@ -44,7 +44,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, {user?.name?.split(' ')[0]}! 👋
+            Welcome back, {profile?.display_name?.split(' ')[0] || 'there'}! 👋
           </h1>
           <p className="text-muted-foreground mt-2">
             {isMentor 
