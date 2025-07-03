@@ -1,7 +1,8 @@
+/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.3'
 
 const supabaseUrl = 'https://dhxvfcxawoubuqkxrumi.supabase.co'
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 if (!supabaseServiceKey) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required')
