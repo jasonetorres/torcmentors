@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, User, Lock, Mail, Camera } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AccountSetup() {
@@ -32,7 +32,7 @@ export default function AccountSetup() {
     'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=80&h=80&fit=crop&crop=face'
   ];
   const [isLoading, setIsLoading] = useState(false);
-  const { completeAccountSetup, user } = useAuth();
+  const { updateProfile, user, profile } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,14 +59,15 @@ export default function AccountSetup() {
     setIsLoading(true);
     
     try {
-      await completeAccountSetup({
-        name: `${formData.firstName} ${formData.lastName}`,
-        password: formData.password,
+      await updateProfile({
+        display_name: `${formData.firstName} ${formData.lastName}`,
         bio: formData.bio,
-        linkedinUrl: formData.linkedinUrl,
-        githubUrl: formData.githubUrl,
-        discordUsername: formData.discordUsername,
-        avatar: formData.avatar
+        linkedin_url: formData.linkedinUrl,
+        github_url: formData.githubUrl,
+        discord_username: formData.discordUsername,
+        avatar_url: formData.avatar,
+        is_onboarding_complete: true,
+        onboarding_step: 'completed'
       });
       
       toast({
@@ -104,7 +105,7 @@ export default function AccountSetup() {
             </div>
             <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
             <CardDescription>
-              Welcome! You're joining as a <span className="font-medium text-primary">{user?.role}</span>. 
+              Welcome! You're joining as a <span className="font-medium text-primary">{profile?.role || 'member'}</span>. 
               Please fill in your details to get started.
             </CardDescription>
           </CardHeader>
