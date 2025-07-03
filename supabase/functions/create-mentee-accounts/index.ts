@@ -1,8 +1,7 @@
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.3'
 
 const supabaseUrl = 'https://dhxvfcxawoubuqkxrumi.supabase.co'
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 if (!supabaseServiceKey) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required')
@@ -57,9 +56,16 @@ const menteeEmails = [
   'cmelendezgp@gmail.com'
 ]
 
+interface Result {
+  email: string;
+  success: boolean;
+  error?: string;
+  userId?: string;
+}
+
 Deno.serve(async (req) => {
   try {
-    const results = []
+    const results: Result[] = []
     
     for (const email of menteeEmails) {
       // Create the user account
@@ -106,7 +112,7 @@ Deno.serve(async (req) => {
       status: 200
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating mentee accounts:', error)
     return new Response(JSON.stringify({
       success: false,
