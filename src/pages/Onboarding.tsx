@@ -1,30 +1,30 @@
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { OnboardingStep } from '@/types';
 
 export default function Onboarding() {
-  const { user, updateUser } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
 
-  if (!user) {
+  if (!user || !profile) {
     return null;
   }
 
   const handleStepComplete = (step: OnboardingStep) => {
-    updateUser({ onboardingStep: step });
+    updateProfile({ onboarding_step: step });
   };
 
   const handleComplete = () => {
-    updateUser({ 
-      onboardingStep: 'completed',
-      isOnboardingComplete: true 
+    updateProfile({ 
+      onboarding_step: 'completed',
+      is_onboarding_complete: true 
     });
   };
 
   return (
     <div className="min-h-screen bg-background p-6">
       <OnboardingFlow
-        userRole={user.role}
-        currentStep={user.onboardingStep}
+        userRole={profile.role as any}
+        currentStep={profile.onboarding_step as OnboardingStep}
         onStepComplete={handleStepComplete}
         onComplete={handleComplete}
       />

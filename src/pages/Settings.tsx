@@ -5,20 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Lock, Github, Linkedin, MessageCircle } from 'lucide-react';
 
 export default function Settings() {
-  const { user, updateUser, logout } = useAuth();
+  const { user, profile, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    bio: user?.bio || '',
-    linkedinUrl: user?.linkedinUrl || '',
-    githubUrl: user?.githubUrl || '',
-    discordUsername: user?.discordUsername || ''
+    display_name: profile?.display_name || '',
+    bio: profile?.bio || '',
+    linkedin_url: profile?.linkedin_url || '',
+    github_url: profile?.github_url || '',
+    discord_username: profile?.discord_username || ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +26,7 @@ export default function Settings() {
     setIsLoading(true);
 
     try {
-      updateUser(formData);
+      await updateProfile(formData);
       toast({
         title: "Settings Updated",
         description: "Your account settings have been saved successfully.",
@@ -47,7 +47,7 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    logout();
+    signOut();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
@@ -81,8 +81,8 @@ export default function Settings() {
                   <Input
                     id="name"
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    value={formData.display_name}
+                    onChange={(e) => handleInputChange('display_name', e.target.value)}
                     placeholder="Your full name"
                     className="mt-1"
                   />
@@ -129,8 +129,8 @@ export default function Settings() {
                       <Input
                         id="linkedinUrl"
                         type="url"
-                        value={formData.linkedinUrl}
-                        onChange={(e) => handleInputChange('linkedinUrl', e.target.value)}
+                        value={formData.linkedin_url}
+                        onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
                         placeholder="https://linkedin.com/in/yourprofile"
                         className="pl-10"
                       />
@@ -144,8 +144,8 @@ export default function Settings() {
                       <Input
                         id="githubUrl"
                         type="url"
-                        value={formData.githubUrl}
-                        onChange={(e) => handleInputChange('githubUrl', e.target.value)}
+                        value={formData.github_url}
+                        onChange={(e) => handleInputChange('github_url', e.target.value)}
                         placeholder="https://github.com/yourusername"
                         className="pl-10"
                       />
@@ -160,8 +160,8 @@ export default function Settings() {
                     <Input
                       id="discordUsername"
                       type="text"
-                      value={formData.discordUsername}
-                      onChange={(e) => handleInputChange('discordUsername', e.target.value)}
+                      value={formData.discord_username}
+                      onChange={(e) => handleInputChange('discord_username', e.target.value)}
                       placeholder="username#1234"
                       className="pl-10"
                     />

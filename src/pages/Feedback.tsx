@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Plus, MessageSquare, Clock, CheckCircle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Feedback() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [newFeedback, setNewFeedback] = useState('');
   const [rating, setRating] = useState(0);
 

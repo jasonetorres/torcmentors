@@ -14,10 +14,10 @@ import {
   Activity,
   Zap
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Progress() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const stats = [
     { 

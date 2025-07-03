@@ -22,7 +22,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { OnboardingStep, UserRole } from '@/types';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface OnboardingFlowProps {
   userRole: UserRole;
@@ -37,15 +37,15 @@ export function OnboardingFlow({
   onStepComplete, 
   onComplete 
 }: OnboardingFlowProps) {
-  const { user, updateUser } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
-    bio: user?.bio || '',
-    skills: user?.skills?.join(', ') || '',
-    experience: user?.experience || '',
-    linkedinUrl: user?.linkedinUrl || '',
-    githubUrl: user?.githubUrl || '',
-    discordUsername: user?.discordUsername || '',
-    preferredVideoTool: user?.preferredVideoTool || '',
+    bio: profile?.bio || '',
+    skills: profile?.skills?.join(', ') || '',
+    experience: profile?.experience || '',
+    linkedinUrl: profile?.linkedin_url || '',
+    githubUrl: profile?.github_url || '',
+    discordUsername: profile?.discord_username || '',
+    preferredVideoTool: profile?.preferred_video_tool || '',
     goals: '',
     expectations: ''
   });
@@ -112,14 +112,14 @@ export function OnboardingFlow({
   };
 
   const saveProfileData = () => {
-    updateUser({
+    updateProfile({
       bio: formData.bio,
       skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
       experience: formData.experience,
-      linkedinUrl: formData.linkedinUrl,
-      githubUrl: formData.githubUrl,
-      discordUsername: formData.discordUsername,
-      preferredVideoTool: formData.preferredVideoTool
+      linkedin_url: formData.linkedinUrl,
+      github_url: formData.githubUrl,
+      discord_username: formData.discordUsername,
+      preferred_video_tool: formData.preferredVideoTool
     });
   };
 

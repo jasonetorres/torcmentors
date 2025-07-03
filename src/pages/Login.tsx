@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star, Key, Shield, Mail, Lock } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
@@ -15,14 +15,13 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginType, setLoginType] = useState<'participant' | 'admin'>('participant');
   const [isReturningUser, setIsReturningUser] = useState(false);
-  const { loginWithEmailCode, loginWithEmailPassword, adminLogin, checkUserExists } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
-    if (value && loginType === 'participant') {
-      setIsReturningUser(checkUserExists(value));
-    }
+    // For Supabase auth, we'll always use email/password
+    setIsReturningUser(true);
   };
 
   const handleParticipantLogin = async (e: React.FormEvent) => {
@@ -30,17 +29,11 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      if (isReturningUser) {
-        await loginWithEmailPassword(email, password);
-      } else {
-        await loginWithEmailCode(email, accessCode);
-      }
+      await signIn(email, password);
     } catch (error) {
       toast({
         title: "Access Denied",
-        description: isReturningUser 
-          ? "Invalid email or password. Please check your credentials and try again."
-          : "Invalid email or access code. Please check your credentials and try again.",
+        description: "Invalid email or password. Please check your credentials and try again.",
         variant: "destructive"
       });
     } finally {
@@ -53,7 +46,7 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      await adminLogin(adminPassword);
+      await signIn(email, adminPassword);
     } catch (error) {
       toast({
         title: "Invalid Admin Password", 

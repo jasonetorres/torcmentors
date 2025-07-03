@@ -23,14 +23,14 @@ import {
   User
 } from 'lucide-react';
 import { mockGoals } from '@/data/mockData';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Goals() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('active');
 
-  const isMentor = user?.role === 'mentor';
+  const isMentor = profile?.role === 'mentor';
 
   // Mock additional goals for mentees
   const allGoals = [
