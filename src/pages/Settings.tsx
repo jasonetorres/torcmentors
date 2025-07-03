@@ -7,19 +7,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Lock, Github, Linkedin, MessageCircle } from 'lucide-react';
+import { User, Mail, Lock, Github, Linkedin, MessageCircle, Camera, Upload } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Settings() {
   const { user, profile, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     display_name: profile?.display_name || '',
     bio: profile?.bio || '',
     linkedin_url: profile?.linkedin_url || '',
     github_url: profile?.github_url || '',
-    discord_username: profile?.discord_username || ''
+    discord_username: profile?.discord_username || '',
+    avatar_url: profile?.avatar_url || ''
   });
+
+  const avatarOptions = [
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=80&h=80&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=80&h=80&fit=crop&crop=face'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +57,66 @@ export default function Settings() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select an image file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      handleInputChange('avatar_url', data.publicUrl);
+      
+      toast({
+        title: "Avatar Uploaded",
+        description: "Your profile picture has been uploaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload your profile picture. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleLogout = () => {
@@ -101,6 +174,78 @@ export default function Settings() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+                </div>
+              </div>
+
+              {/* Profile Picture Section */}
+              <div>
+                <Label>Profile Picture</Label>
+                <div className="mt-2 space-y-3">
+                  <div className="flex justify-center">
+                    <Avatar className="w-20 h-20 border-4 border-primary/20">
+                      <AvatarImage src={formData.avatar_url} alt="Profile picture" />
+                      <AvatarFallback>
+                        <Camera className="w-8 h-8 text-muted-foreground" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2">
+                    {avatarOptions.map((avatarUrl, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleInputChange('avatar_url', avatarUrl)}
+                        className={`p-1 rounded-lg border-2 transition-all hover:scale-105 ${
+                          formData.avatar_url === avatarUrl 
+                            ? 'border-primary shadow-glow' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={avatarUrl} alt={`Avatar option ${index + 1}`} />
+                          <AvatarFallback>
+                            <User className="w-4 h-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Upload Custom Avatar */}
+                  <div className="mt-4">
+                    <Label className="text-sm font-medium">Or upload your own:</Label>
+                    <div className="mt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full relative"
+                        disabled={uploadingAvatar}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          disabled={uploadingAvatar}
+                        />
+                        {uploadingAvatar ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            Uploading...
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Upload className="w-4 h-4" />
+                            Upload Image
+                          </div>
+                        )}
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
