@@ -315,7 +315,11 @@ export default function UsersPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => toast({ title: "Edit User", description: "User editing functionality coming soon." })}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -343,15 +347,24 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Import", description: "CSV import functionality coming soon." })}
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               Import from CSV
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Bulk Update", description: "Bulk role update functionality coming soon." })}
+            >
               <Shield className="w-4 h-4 mr-2" />
               Bulk Role Update
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => toast({ title: "Invitations", description: "Send invitations functionality coming soon." })}
+            >
               <Mail className="w-4 h-4 mr-2" />
               Send Invitations
             </Button>

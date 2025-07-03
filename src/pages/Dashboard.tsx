@@ -64,6 +64,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleUpcomingItemClick = (item: string) => {
+    if (item === 'group-meeting') {
+      navigate('/meetings');
+    } else if (item === 'task-due') {
+      navigate('/tasks');
+    } else if (item === 'milestone-review') {
+      navigate('/progress');
+    }
+  };
+
   const effectiveRole = getEffectiveRole(profile?.role);
 
   if (effectiveRole === 'admin') {
@@ -225,7 +235,10 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30">
+              <div 
+                className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 cursor-pointer hover:bg-primary/20 transition-colors"
+                onClick={() => handleUpcomingItemClick('group-meeting')}
+              >
                 <Calendar className="w-4 h-4 text-primary" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Group Meeting</p>
@@ -233,7 +246,10 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/30">
+              <div 
+                className="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/30 cursor-pointer hover:bg-warning/20 transition-colors"
+                onClick={() => handleUpcomingItemClick('task-due')}
+              >
                 <CheckSquare className="w-4 h-4 text-warning" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Task Due</p>
@@ -241,7 +257,10 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
+              <div 
+                className="flex items-center gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30 cursor-pointer hover:bg-accent/20 transition-colors"
+                onClick={() => handleUpcomingItemClick('milestone-review')}
+              >
                 <Star className="w-4 h-4 text-accent" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">Milestone Review</p>

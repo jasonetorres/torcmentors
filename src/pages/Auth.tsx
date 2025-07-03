@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, Mail, Lock, User, Key } from 'lucide-react';
+import { Mail, Lock, User, Key } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -75,7 +75,11 @@ export default function Auth() {
           <div className="text-center lg:text-left">
             <div className="flex items-center gap-3 justify-center lg:justify-start mb-6">
               <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-                <Star className="w-6 h-6 text-primary-foreground" />
+                <img 
+                  src="/lovable-uploads/c47e68c8-1e93-4148-b3c0-b19b14b60826.png" 
+                  alt="Torc Logo" 
+                  className="w-8 h-8"
+                />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Torc Mentorship</h1>
