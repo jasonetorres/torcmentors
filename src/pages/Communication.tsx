@@ -373,9 +373,43 @@ export default function Communication() {
           <h3 className="font-semibold text-foreground">Group Members</h3>
           <p className="text-xs text-muted-foreground mt-1">Members will appear when you join a group</p>
         </div>
-        <div className="p-4 text-center">
-          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No active members</p>
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face"
+                alt="Sarah Chen"
+                className="w-8 h-8 rounded-full border border-border"
+              />
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border border-background" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                Sarah Chen
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Mentor
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
+                alt="Alex Rivera"
+                className="w-8 h-8 rounded-full border border-border"
+              />
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border border-background" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                Alex Rivera
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Mentee
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

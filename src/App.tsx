@@ -88,9 +88,11 @@ function AppRoutes() {
             <Route path="/groups" element={<Groups />} />
             <Route path="/users" element={<Users />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/surveys" element={<Surveys />} />
           </>
         )}
+        
+        {/* Shared Routes */}
+        <Route path="/surveys" element={<Surveys />} />
         
         {/* Mentor Routes */}
         {effectiveRole === 'mentor' && (
@@ -100,7 +102,6 @@ function AppRoutes() {
           </>
         )}
         
-        {/* Shared Routes */}
         <Route path="/communication" element={<Communication />} />
         <Route path="/group-chat" element={<GroupChat />} />
         <Route path="/resources" element={<Resources />} />

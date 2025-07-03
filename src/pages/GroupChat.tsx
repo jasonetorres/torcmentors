@@ -27,7 +27,7 @@ interface Message {
 }
 
 export default function GroupChat() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [newMessage, setNewMessage] = useState('');
   
   // Mock messages for the group
@@ -84,9 +84,35 @@ export default function GroupChat() {
     }
   ]);
 
-  // Real implementation will load user's group from database
-  const userGroup = null;
-  const groupMembers: any[] = [];
+  // Mock group data - real implementation will load from database
+  const userGroup = {
+    id: 'group-1',
+    name: 'Frontend Focus Group',
+    discordChannel: '#frontend-focus',
+    status: 'active',
+    meetingSchedule: 'Wednesdays 6:00 PM EST',
+    currentPhase: 'Phase 1: Goal Setting',
+    completedSessions: 3,
+    totalSessions: 8,
+    description: 'Frontend development mentorship group'
+  };
+  
+  const groupMembers = [
+    {
+      id: '1',
+      name: 'Sarah Chen',
+      role: 'Mentor',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face',
+      isOnline: true
+    },
+    {
+      id: '2', 
+      name: 'Alex Rivera',
+      role: 'Mentee',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
+      isOnline: true
+    }
+  ];
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -98,32 +124,22 @@ export default function GroupChat() {
 
   const getUserName = (userId: string) => {
     if (userId === 'system') return 'System';
-    // Real implementation will load from user database
-    return 'Unknown';
+    if (userId === '2') return 'Sarah Chen';
+    if (userId === '3') return 'Alex Rivera';
+    return profile?.display_name || 'Unknown';
   };
 
   const getUserAvatar = (userId: string) => {
-    // Real implementation will load from user database
-    return undefined;
+    if (userId === '2') return 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face';
+    if (userId === '3') return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face';
+    return profile?.avatar_url;
   };
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (!userGroup) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No Group Assigned</h3>
-          <p className="text-muted-foreground">
-            You need to be assigned to a mentor group to access group chat.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Show empty state only for users without groups (removed for demo purposes)
 
   return (
     <div className="space-y-6">
