@@ -60,6 +60,9 @@ export default function Surveys() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSurvey, setEditingSurvey] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [takingSurvey, setTakingSurvey] = useState<any>(null);
+  const [isTakingSurveyOpen, setIsTakingSurveyOpen] = useState(false);
+  const [surveyResponses, setSurveyResponses] = useState<{[key: string]: string}>({});
 
   const handleCreateSurvey = () => {
     if (!newSurvey.title || !newSurvey.description || !newSurvey.type || !newSurvey.deadline) {
@@ -144,6 +147,40 @@ export default function Surveys() {
     toast({
       title: "Survey Results",
       description: `Viewing results for "${survey.title}" - ${survey.responses}/${survey.totalParticipants} responses`,
+    });
+  };
+  
+  const handleTakeSurvey = (survey: any) => {
+    setTakingSurvey(survey);
+    setSurveyResponses({});
+    setIsTakingSurveyOpen(true);
+  };
+
+  const handleSubmitSurvey = () => {
+    if (Object.keys(surveyResponses).length === 0) {
+      toast({
+        title: "Error",
+        description: "Please answer at least one question",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Update survey response count
+    const updatedSurveys = surveys.map(survey => 
+      survey.id === takingSurvey.id 
+        ? { ...survey, responses: survey.responses + 1 }
+        : survey
+    );
+    setSurveys(updatedSurveys);
+    
+    setIsTakingSurveyOpen(false);
+    setTakingSurvey(null);
+    setSurveyResponses({});
+    
+    toast({
+      title: "Survey Submitted",
+      description: "Thank you for your response!",
     });
   };
 
@@ -338,10 +375,7 @@ export default function Surveys() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => toast({
-                          title: "Take Survey",
-                          description: `Opening survey: ${survey.title}`,
-                        })}
+                        onClick={() => handleTakeSurvey(survey)}
                       >
                         Take Survey
                       </Button>
@@ -460,6 +494,131 @@ export default function Surveys() {
               </Button>
               <Button onClick={handleUpdateSurvey}>
                 Update Survey
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Take Survey Dialog */}
+        <Dialog open={isTakingSurveyOpen} onOpenChange={setIsTakingSurveyOpen}>
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Take Survey: {takingSurvey?.title}</DialogTitle>
+              <DialogDescription>
+                {takingSurvey?.description}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Sample survey questions based on survey type */}
+              {takingSurvey?.type === 'feedback' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>How would you rate your overall experience with the mentorship program?</Label>
+                    <Select onValueChange={(value) => setSurveyResponses({...surveyResponses, q1: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select rating" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="excellent">Excellent</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="average">Average</SelectItem>
+                        <SelectItem value="poor">Poor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>What aspects of the program could be improved?</Label>
+                    <Textarea
+                      placeholder="Share your thoughts..."
+                      value={surveyResponses.q2 || ''}
+                      onChange={(e) => setSurveyResponses({...surveyResponses, q2: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
+              
+              {takingSurvey?.type === 'assessment' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>What are your primary career goals?</Label>
+                    <Textarea
+                      placeholder="Describe your career aspirations..."
+                      value={surveyResponses.q1 || ''}
+                      onChange={(e) => setSurveyResponses({...surveyResponses, q1: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Which skills would you like to develop most?</Label>
+                    <Select onValueChange={(value) => setSurveyResponses({...surveyResponses, q2: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select primary skill focus" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="technical">Technical Skills</SelectItem>
+                        <SelectItem value="leadership">Leadership</SelectItem>
+                        <SelectItem value="communication">Communication</SelectItem>
+                        <SelectItem value="project-management">Project Management</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              
+              {takingSurvey?.type === 'satisfaction' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>How satisfied are you with your mentor?</Label>
+                    <Select onValueChange={(value) => setSurveyResponses({...surveyResponses, q1: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select satisfaction level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="very-satisfied">Very Satisfied</SelectItem>
+                        <SelectItem value="satisfied">Satisfied</SelectItem>
+                        <SelectItem value="neutral">Neutral</SelectItem>
+                        <SelectItem value="dissatisfied">Dissatisfied</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Would you recommend this program to others?</Label>
+                    <Select onValueChange={(value) => setSurveyResponses({...surveyResponses, q2: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select recommendation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="definitely">Definitely</SelectItem>
+                        <SelectItem value="probably">Probably</SelectItem>
+                        <SelectItem value="maybe">Maybe</SelectItem>
+                        <SelectItem value="probably-not">Probably Not</SelectItem>
+                        <SelectItem value="definitely-not">Definitely Not</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              
+              {/* Generic questions for other survey types */}
+              {!['feedback', 'assessment', 'satisfaction'].includes(takingSurvey?.type) && (
+                <div className="space-y-2">
+                  <Label>Please share your thoughts about this topic:</Label>
+                  <Textarea
+                    placeholder="Your response..."
+                    value={surveyResponses.q1 || ''}
+                    onChange={(e) => setSurveyResponses({...surveyResponses, q1: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsTakingSurveyOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitSurvey}>
+                Submit Response
               </Button>
             </div>
           </DialogContent>
