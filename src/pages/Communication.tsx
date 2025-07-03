@@ -150,7 +150,7 @@ export default function Communication() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-4 lg:gap-6">
+    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-4 lg:gap-6 max-w-full overflow-hidden">
       {/* Mobile: Channels as collapsible top section */}
       <div className="lg:hidden">
         <div className="bg-gradient-card border border-border rounded-lg shadow-card mb-4">

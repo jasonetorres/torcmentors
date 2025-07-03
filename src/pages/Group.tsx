@@ -31,21 +31,21 @@ export default function Group() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Frontend Focus Group</h1>
+    <div className="space-y-6 max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">Frontend Focus Group</h1>
           <p className="text-muted-foreground mt-2">
             Your mentorship group for career development and growth
           </p>
         </div>
-        <Button className="bg-gradient-primary" onClick={handleGroupChat}>
+        <Button className="bg-gradient-primary shrink-0" onClick={handleGroupChat}>
           <MessageSquare className="w-4 h-4 mr-2" />
           Group Chat
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-full">
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-gradient-card border-border shadow-card">
             <CardHeader>
