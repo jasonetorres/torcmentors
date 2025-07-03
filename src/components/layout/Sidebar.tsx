@@ -34,34 +34,34 @@ export default function Sidebar() {
 
   const adminNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
-    { name: 'Groups', href: '/groups', icon: Users, badge: '10' },
-    { name: 'Users', href: '/users', icon: UserPlus, badge: '52' },
+    { name: 'Groups', href: '/groups', icon: Users, badge: null },
+    { name: 'Users', href: '/users', icon: UserPlus, badge: null },
     { name: 'Resources', href: '/resources', icon: BookOpen, badge: null },
     { name: 'Analytics', href: '/analytics', icon: BarChart3, badge: null },
-    { name: 'Surveys', href: '/surveys', icon: MessageSquare, badge: '3' },
+    { name: 'Surveys', href: '/surveys', icon: MessageSquare, badge: null },
     { name: 'Settings', href: '/settings', icon: Settings, badge: null }
   ];
 
   const mentorNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
-    { name: 'My Group', href: '/group', icon: Users, badge: '3' },
-    { name: 'Group Chat', href: '/group-chat', icon: MessageSquare, badge: '5' },
-    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: '2' },
-    { name: 'Mentor Kit', href: '/mentor-kit', icon: Briefcase, badge: 'New' },
-    { name: 'Meetings', href: '/meetings', icon: Calendar, badge: '2' },
+    { name: 'My Group', href: '/group', icon: Users, badge: null },
+    { name: 'Group Chat', href: '/group-chat', icon: MessageSquare, badge: null },
+    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: null },
+    { name: 'Mentor Kit', href: '/mentor-kit', icon: Briefcase, badge: null },
+    { name: 'Meetings', href: '/meetings', icon: Calendar, badge: null },
     { name: 'Goals & Progress', href: '/goals', icon: Target, badge: null },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: '4' },
+    { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: null },
     { name: 'Resources', href: '/resources', icon: BookOpen, badge: null },
     { name: 'Feedback', href: '/feedback', icon: Star, badge: null }
   ];
 
   const menteeNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
-    { name: 'My Goals', href: '/goals', icon: Target, badge: '3' },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: '2' },
-    { name: 'Group Chat', href: '/group-chat', icon: MessageSquare, badge: '3' },
-    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: '1' },
-    { name: 'Meetings', href: '/meetings', icon: Calendar, badge: '1' },
+    { name: 'My Goals', href: '/goals', icon: Target, badge: null },
+    { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: null },
+    { name: 'Group Chat', href: '/group-chat', icon: MessageSquare, badge: null },
+    { name: 'Communication', href: '/communication', icon: MessageSquare, badge: null },
+    { name: 'Meetings', href: '/meetings', icon: Calendar, badge: null },
     { name: 'Group', href: '/group', icon: Users, badge: null },
     { name: 'Resources', href: '/resources', icon: BookOpen, badge: null },
     { name: 'Progress', href: '/progress', icon: TrendingUp, badge: null }
