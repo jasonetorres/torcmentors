@@ -20,7 +20,7 @@ import {
   Volume2,
   Video
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 interface Message {
   id: string;
@@ -43,12 +43,12 @@ interface Channel {
 }
 
 export default function Communication() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const isMentor = user?.role === 'mentor';
+  const isMentor = profile?.role === 'mentor';
 
   // Mock channels
   const channels: Channel[] = [
