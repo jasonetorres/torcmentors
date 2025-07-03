@@ -7,6 +7,8 @@ export const mentorKits: MentorKit[] = [
     title: 'Launch & Goal Setting',
     description: 'Establish rapport, introduce the program structure and tools, and define mentee goals using provided frameworks',
     prepTime: 90,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
     objectives: [
       'Build rapport and trust within the mentoring group',
       'Introduce the program structure, tools, and expectations',
@@ -26,7 +28,7 @@ export const mentorKits: MentorKit[] = [
         id: 'welcome-onboarding',
         title: 'Welcome & Onboarding Guide',
         description: 'Comprehensive onboarding session to establish group foundation',
-        type: 'Onboarding',
+        type: 'workshop',
         duration: 90,
         instructions: [
           'Facilitate introductions using structured format with brief overview of Phase 1 goals',
@@ -47,7 +49,7 @@ export const mentorKits: MentorKit[] = [
         id: 'goal-setting-workshop',
         title: 'Goal Setting Workshop',
         description: 'Step-by-step workshop for comprehensive SMART goal development',
-        type: 'Workshop',
+        type: 'workshop',
         duration: 120,
         instructions: [
           'Provide step-by-step agenda for the Goal Setting Workshop',
@@ -69,23 +71,41 @@ export const mentorKits: MentorKit[] = [
       {
         id: 'smart-goal-guide',
         title: 'SMART Goal Guide (PDF/Google Doc)',
-        type: 'Guide',
+        type: 'guide',
         estimatedReadTime: 15,
-        url: '/resources/smart-goal-guide.pdf'
+        url: '/resources/smart-goal-guide.pdf',
+        phase: 'phase1',
+        category: 'guides',
+        tags: ['goals', 'smart', 'planning'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'program-terms',
         title: 'Torc Mentorship Program Terms and Code of Conduct',
-        type: 'Document',
+        type: 'document',
         estimatedReadTime: 10,
-        url: '/resources/program-terms.pdf'
+        url: '/resources/program-terms.pdf',
+        phase: 'phase1',
+        category: 'documentation',
+        tags: ['terms', 'conduct', 'policy'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'tool-setup-guide',
         title: 'Tool Setup and Access Guide',
-        type: 'Guide',
+        type: 'guide',
         estimatedReadTime: 12,
-        url: '/resources/tool-setup-guide.pdf'
+        url: '/resources/tool-setup-guide.pdf',
+        phase: 'phase1',
+        category: 'technical',
+        tags: ['setup', 'tools', 'onboarding'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     templates: [
@@ -93,15 +113,27 @@ export const mentorKits: MentorKit[] = [
         id: 'goal-worksheet',
         title: 'Mentee Goal Setting Worksheet (Fillable PDF/Google Doc)',
         description: 'Sections for drafting preliminary goals with SMART criteria prompts',
-        type: 'Worksheet',
-        downloadUrl: '/templates/goal-setting-worksheet.pdf'
+        type: 'template',
+        downloadUrl: '/templates/goal-setting-worksheet.pdf',
+        phase: 'phase1',
+        category: 'worksheets',
+        tags: ['goals', 'worksheet', 'planning'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'action-plan-template',
         title: 'Action Plan Template (Google Doc/Markdown)',
         description: 'Simple template with columns for Task, Due Date, Responsible Person, Status',
-        type: 'Template',
-        downloadUrl: '/templates/action-plan-template.md'
+        type: 'template',
+        downloadUrl: '/templates/action-plan-template.md',
+        phase: 'phase1',
+        category: 'templates',
+        tags: ['planning', 'action', 'template'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     nextSteps: [
@@ -117,6 +149,8 @@ export const mentorKits: MentorKit[] = [
     title: 'Foundation & Exploration',
     description: 'Work on goals and explore professional topics using program-provided case studies and resources',
     prepTime: 120,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
     objectives: [
       'Apply technical problem-solving skills to real-world scenarios',
       'Develop effective communication and feedback skills in tech environments',
@@ -136,7 +170,7 @@ export const mentorKits: MentorKit[] = [
         id: 'strengths-roadblocks',
         title: 'Developing Strengths & Overcoming Roadblocks',
         description: 'Technical case study discussion with real-world problem analysis',
-        type: 'Case Study',
+        type: 'case-study',
         duration: 90,
         instructions: [
           'Present the technical case study - anonymized real-world technical problem',
@@ -157,7 +191,7 @@ export const mentorKits: MentorKit[] = [
         id: 'communication-feedback',
         title: 'Effective Communication & Feedback in Tech',
         description: 'Interactive workshop on professional communication skills',
-        type: 'Workshop',
+        type: 'workshop',
         duration: 105,
         instructions: [
           'Use discussion slide outline covering active listening and clear technical communication',
@@ -178,7 +212,7 @@ export const mentorKits: MentorKit[] = [
         id: 'career-paths',
         title: 'Navigating Career Paths & Opportunities',
         description: 'Career journey exploration and opportunity identification session',
-        type: 'Discussion',
+        type: 'discussion',
         duration: 90,
         instructions: [
           'Use discussion prompts to structure sharing mentor\'s career journey and pivotal decisions',
@@ -199,7 +233,7 @@ export const mentorKits: MentorKit[] = [
         id: 'productivity-agile',
         title: 'Productivity & Agile Practices',
         description: 'Introduction to productivity techniques and agile methodologies',
-        type: 'Workshop',
+        type: 'workshop',
         duration: 90,
         instructions: [
           'Lead discussion on time management techniques (Pomodoro, time blocking) and prioritization',
@@ -221,23 +255,41 @@ export const mentorKits: MentorKit[] = [
       {
         id: 'technical-case-studies',
         title: 'Program-Provided Technical Challenge Collection',
-        type: 'Case Study',
+        type: 'case-study',
         estimatedReadTime: 30,
-        url: '/resources/technical-challenges.pdf'
+        url: '/resources/technical-challenges.pdf',
+        phase: 'phase2',
+        category: 'case-studies',
+        tags: ['technical', 'challenges', 'problem-solving'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'communication-articles',
         title: 'Curated Communication & Feedback Articles',
-        type: 'Article Collection',
+        type: 'document',
         estimatedReadTime: 25,
-        url: '/resources/communication-articles.pdf'
+        url: '/resources/communication-articles.pdf',
+        phase: 'phase2',
+        category: 'communication',
+        tags: ['communication', 'feedback', 'articles'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'agile-productivity-resources',
         title: 'Productivity & Agile Practices Resource Library',
-        type: 'Resource Collection',
+        type: 'document',
         estimatedReadTime: 20,
-        url: '/resources/agile-productivity.pdf'
+        url: '/resources/agile-productivity.pdf',
+        phase: 'phase2',
+        category: 'productivity',
+        tags: ['agile', 'productivity', 'practices'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     templates: [
@@ -245,15 +297,27 @@ export const mentorKits: MentorKit[] = [
         id: 'progress-report-template',
         title: 'Goal Progress Reporting Template',
         description: 'Simple prompts for mentees to report progress since Phase 1',
-        type: 'Template',
-        downloadUrl: '/templates/progress-report.pdf'
+        type: 'template',
+        downloadUrl: '/templates/progress-report.pdf',
+        phase: 'phase2',
+        category: 'reporting',
+        tags: ['progress', 'goals', 'reporting'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'career-reflector-worksheet',
         title: 'Career Path Reflector Worksheet (Fillable PDF/Google Doc)',
         description: 'Prompts for reflecting on skills, interests, values, and potential career paths',
-        type: 'Worksheet',
-        downloadUrl: '/templates/career-path-reflector.pdf'
+        type: 'template',
+        downloadUrl: '/templates/career-path-reflector.pdf',
+        phase: 'phase2',
+        category: 'career',
+        tags: ['career', 'reflection', 'worksheet'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     nextSteps: [
@@ -269,6 +333,8 @@ export const mentorKits: MentorKit[] = [
     title: 'Deep Dive & Mid-Program Review',
     description: 'Tackle advanced technical scenarios and review progress with structured support',
     prepTime: 135,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
     objectives: [
       'Master advanced problem-solving and technical decision-making skills',
       'Build strong professional networks and optimize online presence',
@@ -288,7 +354,7 @@ export const mentorKits: MentorKit[] = [
         id: 'advanced-problem-solving',
         title: 'Advanced Problem-Solving & Technical Decision Making',
         description: 'Complex system design challenge with collaborative whiteboarding',
-        type: 'Technical Challenge',
+        type: 'exercise',
         duration: 120,
         instructions: [
           'Present complex technical challenge - anonymized system design problem',
@@ -309,7 +375,7 @@ export const mentorKits: MentorKit[] = [
         id: 'networking-presence',
         title: 'Building Your Professional Network & Online Presence',
         description: 'Comprehensive workshop on networking strategies and personal branding',
-        type: 'Workshop',
+        type: 'workshop',
         duration: 90,
         instructions: [
           'Lead discussion on networking importance (online and offline strategies)',
@@ -330,7 +396,7 @@ export const mentorKits: MentorKit[] = [
         id: 'mid-program-review',
         title: 'Mid-Program Review & Strategic Assessment',
         description: 'Comprehensive progress review and program optimization session',
-        type: 'Review Session',
+        type: 'discussion',
         duration: 90,
         instructions: [
           'Review mid-program survey results and feedback collected by Jason',
@@ -352,23 +418,41 @@ export const mentorKits: MentorKit[] = [
       {
         id: 'system-design-challenges',
         title: 'Advanced System Design Challenge Collection',
-        type: 'Technical Challenge',
+        type: 'exercise',
         estimatedReadTime: 45,
-        url: '/resources/advanced-system-design.pdf'
+        url: '/resources/advanced-system-design.pdf',
+        phase: 'phase3',
+        category: 'exercises',
+        tags: ['system-design', 'architecture', 'advanced'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'networking-strategies',
         title: 'Professional Networking & Online Presence Comprehensive Guide',
-        type: 'Guide',
+        type: 'guide',
         estimatedReadTime: 30,
-        url: '/resources/networking-guide.pdf'
+        url: '/resources/networking-guide.pdf',
+        phase: 'phase3',
+        category: 'professional-development',
+        tags: ['networking', 'branding', 'career'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'mid-program-assessment',
         title: 'Mid-Program Review Framework and Tools',
-        type: 'Assessment Tools',
+        type: 'document',
         estimatedReadTime: 25,
-        url: '/resources/mid-program-review.pdf'
+        url: '/resources/mid-program-review.pdf',
+        phase: 'phase3',
+        category: 'assessment',
+        tags: ['review', 'assessment', 'progress'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     templates: [
@@ -376,15 +460,27 @@ export const mentorKits: MentorKit[] = [
         id: 'profile-checklist',
         title: 'Technical Profile Checklist (Fillable PDF/Google Doc)',
         description: 'Comprehensive checklist for LinkedIn and GitHub profile optimization',
-        type: 'Checklist',
-        downloadUrl: '/templates/profile-checklist.pdf'
+        type: 'template',
+        downloadUrl: '/templates/profile-checklist.pdf',
+        phase: 'phase3',
+        category: 'professional-development',
+        tags: ['profile', 'linkedin', 'github'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'mid-program-template',
         title: 'Mid-Program Assessment Template',
         description: 'Structured template for comprehensive progress review and goal adjustment',
-        type: 'Assessment',
-        downloadUrl: '/templates/mid-program-assessment.pdf'
+        type: 'template',
+        downloadUrl: '/templates/mid-program-assessment.pdf',
+        phase: 'phase3',
+        category: 'assessment',
+        tags: ['assessment', 'review', 'goals'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     nextSteps: [
@@ -400,6 +496,8 @@ export const mentorKits: MentorKit[] = [
     title: 'Reflection & Future Planning',
     description: 'Reflect on achievements and plan for continued growth beyond the program',
     prepTime: 75,
+    createdAt: new Date('2025-01-01'),
+    updatedAt: new Date('2025-01-01'),
     objectives: [
       'Conduct comprehensive reflection on program achievements and personal growth',
       'Celebrate individual and group progress, milestones, and breakthrough moments',
@@ -419,7 +517,7 @@ export const mentorKits: MentorKit[] = [
         id: 'celebration-reflection',
         title: 'Celebrating Progress & Lessons Learned',
         description: 'Comprehensive reflection session with structured achievement celebration',
-        type: 'Reflection',
+        type: 'discussion',
         duration: 120,
         instructions: [
           'Use reflection prompts to guide mentees through structured reflection process',
@@ -440,7 +538,7 @@ export const mentorKits: MentorKit[] = [
         id: 'future-planning',
         title: 'Continuous Development Planning Workshop',
         description: 'Strategic planning session for sustained post-program growth',
-        type: 'Planning',
+        type: 'workshop',
         duration: 90,
         instructions: [
           'Guide creation of new short-term and long-term development goals using lessons learned',
@@ -462,23 +560,41 @@ export const mentorKits: MentorKit[] = [
       {
         id: 'reflection-framework',
         title: 'Structured Reflection Framework for Professional Growth',
-        type: 'Framework',
+        type: 'guide',
         estimatedReadTime: 15,
-        url: '/resources/reflection-framework.pdf'
+        url: '/resources/reflection-framework.pdf',
+        phase: 'phase4',
+        category: 'reflection',
+        tags: ['reflection', 'growth', 'framework'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'continuous-learning',
         title: 'Continuous Learning and Development in Tech Careers',
-        type: 'Guide',
+        type: 'guide',
         estimatedReadTime: 25,
-        url: '/resources/continuous-learning.pdf'
+        url: '/resources/continuous-learning.pdf',
+        phase: 'phase4',
+        category: 'professional-development',
+        tags: ['learning', 'development', 'career'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'network-maintenance',
         title: 'Maintaining Professional Relationships and Networks',
-        type: 'Guide',
+        type: 'guide',
         estimatedReadTime: 18,
-        url: '/resources/network-maintenance.pdf'
+        url: '/resources/network-maintenance.pdf',
+        phase: 'phase4',
+        category: 'networking',
+        tags: ['networking', 'relationships', 'maintenance'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     templates: [
@@ -486,15 +602,27 @@ export const mentorKits: MentorKit[] = [
         id: 'development-plan-template',
         title: 'Continuous Development Plan Template (Fillable PDF/Google Doc)',
         description: 'Comprehensive template for defining ongoing development strategy with accountability',
-        type: 'Template',
-        downloadUrl: '/templates/continuous-development-plan.pdf'
+        type: 'template',
+        downloadUrl: '/templates/continuous-development-plan.pdf',
+        phase: 'phase4',
+        category: 'planning',
+        tags: ['development', 'planning', 'template'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       },
       {
         id: 'reflection-template',
         title: 'Program Reflection and Insights Template',
         description: 'Structured format for capturing key takeaways, lessons learned, and future advice',
-        type: 'Template',
-        downloadUrl: '/templates/reflection-insights.pdf'
+        type: 'template',
+        downloadUrl: '/templates/reflection-insights.pdf',
+        phase: 'phase4',
+        category: 'reflection',
+        tags: ['reflection', 'insights', 'template'],
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        isPublic: true
       }
     ],
     nextSteps: [
