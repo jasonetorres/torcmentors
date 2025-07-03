@@ -10,11 +10,7 @@ import RolePreviewSwitcher from '@/components/admin/RolePreviewSwitcher';
 export default function Header() {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New task assigned', message: 'Complete Goal Setting Worksheet', time: '5m ago', read: false },
-    { id: 2, title: 'Meeting reminder', message: 'Phase 1 workshop in 2 hours', time: '2h ago', read: false },
-    { id: 3, title: 'Goal milestone reached', message: 'React fundamentals completed', time: '1d ago', read: true }
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

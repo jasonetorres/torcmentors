@@ -523,11 +523,11 @@ export function OnboardingFlow({
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { label: 'Profile completed', completed: true },
-                  { label: 'Goals defined', completed: true },
-                  { label: 'Discord connected', completed: true },
+                  { label: 'Profile completed', completed: false },
+                  { label: 'Goals defined', completed: false },
+                  { label: 'Discord connected', completed: false },
                   { label: 'GitHub access granted', completed: false },
-                  { label: 'Meeting scheduled', completed: true },
+                  { label: 'Meeting scheduled', completed: false },
                   { label: 'Group introductions', completed: false }
                 ].map((item, index) => (
                   <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">

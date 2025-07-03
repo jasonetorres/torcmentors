@@ -26,16 +26,16 @@ export default function MentorKit() {
       title: 'Launch & Goal Setting',
       description: 'Establish rapport and define mentee goals',
       duration: 'July',
-      status: 'active',
+      status: 'upcoming',
       sessions: 2,
-      completedSessions: 1
+      completedSessions: 0
     },
     {
       phase: 'phase2' as ProgramPhase,
       title: 'Foundation & Exploration',
       description: 'Work on goals and explore professional topics',
       duration: 'August - September',
-      status: 'upcoming',
+      status: 'locked',
       sessions: 4,
       completedSessions: 0
     },
@@ -61,10 +61,8 @@ export default function MentorKit() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-primary/20 text-primary border-primary/30';
       case 'upcoming':
-        return 'bg-accent/20 text-accent border-accent/30';
+        return 'bg-primary/20 text-primary border-primary/30';
       case 'locked':
         return 'bg-muted text-muted-foreground border-muted-foreground/30';
       default:
