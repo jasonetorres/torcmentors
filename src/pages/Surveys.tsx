@@ -7,11 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, MessageSquare, Users, Calendar, TrendingUp } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Plus, MessageSquare, Users, Calendar, TrendingUp, Trash2, BarChart3, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Surveys() {
   const { toast } = useToast();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === 'admin';
   const [surveys, setSurveys] = useState([
     {
       id: 1,
@@ -52,6 +56,8 @@ export default function Surveys() {
     deadline: ''
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSurvey, setEditingSurvey] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleCreateSurvey = () => {
     if (!newSurvey.title || !newSurvey.description || !newSurvey.type || !newSurvey.deadline) {
@@ -81,6 +87,61 @@ export default function Surveys() {
     toast({
       title: "Survey Created",
       description: "Your survey has been successfully created",
+    });
+  };
+
+  const handleEditSurvey = (survey: any) => {
+    setEditingSurvey(survey);
+    setNewSurvey({
+      title: survey.title,
+      description: survey.description,
+      type: survey.type,
+      deadline: survey.deadline
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateSurvey = () => {
+    if (!newSurvey.title || !newSurvey.description || !newSurvey.type || !newSurvey.deadline) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const updatedSurveys = surveys.map(survey => 
+      survey.id === editingSurvey.id 
+        ? { ...survey, ...newSurvey }
+        : survey
+    );
+
+    setSurveys(updatedSurveys);
+    setNewSurvey({ title: '', description: '', type: '', deadline: '' });
+    setEditingSurvey(null);
+    setIsEditDialogOpen(false);
+    
+    toast({
+      title: "Survey Updated",
+      description: "Your survey has been successfully updated",
+    });
+  };
+
+  const handleDeleteSurvey = (surveyId: number) => {
+    const updatedSurveys = surveys.filter(survey => survey.id !== surveyId);
+    setSurveys(updatedSurveys);
+    
+    toast({
+      title: "Survey Deleted",
+      description: "The survey has been successfully deleted",
+    });
+  };
+
+  const handleViewResults = (survey: any) => {
+    toast({
+      title: "Survey Results",
+      description: `Viewing results for "${survey.title}" - ${survey.responses}/${survey.totalParticipants} responses`,
     });
   };
 
@@ -248,12 +309,49 @@ export default function Surveys() {
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewResults(survey)}
+                    >
+                      <BarChart3 className="w-4 h-4 mr-1" />
                       View Results
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditSurvey(survey)}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
+                    {isAdmin && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Survey</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{survey.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteSurvey(survey.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -281,6 +379,70 @@ export default function Surveys() {
             </Card>
           ))}
         </div>
+
+        {/* Edit Survey Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Survey</DialogTitle>
+              <DialogDescription>
+                Update the details for this survey.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-title">Survey Title</Label>
+                <Input
+                  id="edit-title"
+                  value={newSurvey.title}
+                  onChange={(e) => setNewSurvey({ ...newSurvey, title: e.target.value })}
+                  placeholder="Enter survey title"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={newSurvey.description}
+                  onChange={(e) => setNewSurvey({ ...newSurvey, description: e.target.value })}
+                  placeholder="Describe the purpose of this survey"
+                  rows={3}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-type">Survey Type</Label>
+                <Select value={newSurvey.type} onValueChange={(value) => setNewSurvey({ ...newSurvey, type: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select survey type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feedback">Feedback</SelectItem>
+                    <SelectItem value="assessment">Assessment</SelectItem>
+                    <SelectItem value="satisfaction">Satisfaction</SelectItem>
+                    <SelectItem value="evaluation">Evaluation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-deadline">Deadline</Label>
+                <Input
+                  id="edit-deadline"
+                  type="date"
+                  value={newSurvey.deadline}
+                  onChange={(e) => setNewSurvey({ ...newSurvey, deadline: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateSurvey}>
+                Update Survey
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
