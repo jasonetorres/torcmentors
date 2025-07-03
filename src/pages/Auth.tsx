@@ -3,17 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, Mail, Lock, User } from 'lucide-react';
+import { Star, Mail, Lock, User, Key } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Signup codes
+const MENTOR_CODE = 'MENTOR2025';
+const MENTEE_CODE = 'MENTEE2025';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [signupCode, setSignupCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +34,26 @@ export default function Auth() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate signup code
+    let role = 'mentee';
+    if (signupCode === MENTOR_CODE) {
+      role = 'mentor';
+    } else if (signupCode === MENTEE_CODE) {
+      role = 'mentee';
+    } else {
+      toast({
+        title: "Invalid Signup Code",
+        description: "Please enter a valid signup code.",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -34,7 +61,7 @@ export default function Auth() {
     
     await signUp(email, password, {
       display_name: displayName,
-      role: 'mentee' // Default role, can be changed later
+      role: role
     });
     
     setIsLoading(false);
@@ -197,6 +224,25 @@ export default function Auth() {
                         required
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="signup-code">Signup Code</Label>
+                    <div className="relative mt-1">
+                      <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="signup-code"
+                        type="text"
+                        placeholder="Enter your signup code"
+                        value={signupCode}
+                        onChange={(e) => setSignupCode(e.target.value.toUpperCase())}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use MENTOR2025 for mentors or MENTEE2025 for mentees
+                    </p>
                   </div>
 
                   <Button 
