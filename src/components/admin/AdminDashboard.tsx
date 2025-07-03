@@ -21,7 +21,7 @@ import {
   BarChart3,
   Clock
 } from 'lucide-react';
-import { mockAnalytics, mockGroups, mockUsers, mockResources } from '@/data/mockData';
+
 import { Group, User, Resource } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -106,7 +106,7 @@ export function AdminDashboard() {
     },
     {
       title: "Resource Library",
-      value: "2",
+      value: "0",
       change: "",
       icon: BookOpen,
       color: "text-warning"
@@ -413,8 +413,19 @@ export function AdminDashboard() {
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {mockResources.map((resource: Resource) => (
+          <div className="text-center py-12">
+            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-lg font-medium text-foreground mb-2">No Resources Yet</p>
+            <p className="text-muted-foreground mb-4">Add your first resource to the library</p>
+            <Button className="bg-gradient-primary" onClick={() => setIsAddResourceOpen(true)}>
+              <FileText className="w-4 h-4 mr-2" />
+              Add First Resource
+            </Button>
+          </div>
+          
+          {/* Future: Replace with real resources */}
+          <div className="hidden grid-cols-1 lg:grid-cols-2 gap-6">
+            {[].map((resource: Resource) => (
               <Card key={resource.id} className="bg-gradient-card border-border shadow-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">

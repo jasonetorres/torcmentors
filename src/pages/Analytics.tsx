@@ -17,7 +17,7 @@ import {
   Clock,
   MessageSquare
 } from 'lucide-react';
-import { mockAnalytics } from '@/data/mockData';
+
 
 export default function Analytics() {
   const { toast } = useToast();

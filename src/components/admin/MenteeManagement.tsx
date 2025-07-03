@@ -26,7 +26,7 @@ import {
   AlertCircle,
   UserMinus
 } from 'lucide-react';
-import { mockUsers, mockGroups } from '@/data/mockData';
+
 import { User, Group } from '@/types';
 import { UserRole } from '@/types';
 import { useToast } from '@/hooks/use-toast';
