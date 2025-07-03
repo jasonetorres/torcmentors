@@ -54,47 +54,7 @@ export default function Groups() {
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [assigningGroup, setAssigningGroup] = useState<Group | null>(null);
-  const [groups, setGroups] = useState<Group[]>([
-    {
-      id: 'group-1',
-      name: 'Frontend Focus Group',
-      description: 'Intensive frontend development mentorship focusing on React, TypeScript, and modern web development practices',
-      phase: 'phase1',
-      status: 'active',
-      mentorId: 'mentor-1',
-      mentorName: 'Sarah Chen',
-      menteeCount: 3,
-      maxSize: 4,
-      schedule: 'Wednesdays 6:00 PM EST',
-      createdAt: new Date('2025-01-01')
-    },
-    {
-      id: 'group-2', 
-      name: 'Backend Builders',
-      description: 'Server-side development mentorship covering Node.js, databases, and API design',
-      phase: 'phase2',
-      status: 'active',
-      mentorId: 'mentor-2',
-      mentorName: 'Mike Rodriguez',
-      menteeCount: 4,
-      maxSize: 5,
-      schedule: 'Thursdays 7:00 PM EST',
-      createdAt: new Date('2025-01-05')
-    },
-    {
-      id: 'group-3',
-      name: 'Career Transition Support',
-      description: 'Support group for professionals transitioning into tech careers',
-      phase: 'phase1',
-      status: 'forming',
-      mentorId: 'mentor-3',
-      mentorName: 'Jessica Park',
-      menteeCount: 2,
-      maxSize: 4,
-      schedule: 'Fridays 5:30 PM EST',
-      createdAt: new Date('2025-01-10')
-    }
-  ]);
+  const [groups, setGroups] = useState<Group[]>([]);
 
   const [newGroup, setNewGroup] = useState({
     name: '',
@@ -221,10 +181,10 @@ export default function Groups() {
   };
 
   const stats = [
-    { title: "Total Groups", value: groups.length.toString(), change: "+2 this month", icon: Users, color: "text-primary" },
-    { title: "Active Mentors", value: groups.filter(g => g.status === 'active').length.toString(), change: "100% engagement", icon: Star, color: "text-success" },
-    { title: "Total Mentees", value: groups.reduce((sum, g) => sum + g.menteeCount, 0).toString(), change: "+8 this month", icon: UserPlus, color: "text-accent" },
-    { title: "Completion Rate", value: "95%", change: "+3% this quarter", icon: TrendingUp, color: "text-warning" }
+    { title: "Total Groups", value: groups.length.toString(), change: "Create your first group", icon: Users, color: "text-primary" },
+    { title: "Active Groups", value: groups.filter(g => g.status === 'active').length.toString(), change: "No active groups yet", icon: Star, color: "text-success" },
+    { title: "Total Members", value: groups.reduce((sum, g) => sum + g.menteeCount, 0).toString(), change: "Invite members to groups", icon: UserPlus, color: "text-accent" },
+    { title: "Program Progress", value: "0%", change: "Start your mentorship journey", icon: TrendingUp, color: "text-warning" }
   ];
 
   const getPhaseColor = (phase: string) => {

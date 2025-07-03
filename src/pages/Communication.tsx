@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MessageSquare, 
   Send, 
@@ -49,119 +50,99 @@ export default function Communication() {
   const [selectedChannel, setSelectedChannel] = useState<string>('general');
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [channels, setChannels] = useState<Channel[]>([
+    {
+      id: 'general',
+      name: 'General',
+      description: 'Main discussion channel',
+      type: 'general',
+      memberCount: 0,
+      unreadCount: 0
+    }
+  ]);
 
   const handleCreateChannel = () => {
     toast({
       title: "Create Channel",
-      description: "Channel creation feature coming soon",
+      description: "Channel creation feature will be implemented soon",
+    });
+  };
+
+  const handleVideoCall = () => {
+    toast({
+      title: "Video Call",
+      description: "Starting video call feature...",
+    });
+  };
+
+  const handleVoiceCall = () => {
+    toast({
+      title: "Voice Call", 
+      description: "Starting voice call feature...",
+    });
+  };
+
+  const handleMoreOptions = () => {
+    toast({
+      title: "Channel Options",
+      description: "Channel settings and options",
+    });
+  };
+
+  const handleAttachFile = () => {
+    toast({
+      title: "Attach File",
+      description: "File attachment feature coming soon",
+    });
+  };
+
+  const handleAddEmoji = () => {
+    toast({
+      title: "Add Emoji",
+      description: "Emoji picker coming soon",
     });
   };
 
   const isMentor = profile?.role === 'mentor';
 
-  // Mock channels
-  const channels: Channel[] = [
-    {
-      id: 'general',
-      name: 'General',
-      description: 'Main discussion channel for everyone',
-      type: 'general',
-      memberCount: 52,
-      unreadCount: 3,
-      lastMessage: {
-        id: '1',
-        userId: '1',
-        userName: 'Sarah Chen',
-        userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face',
-        content: 'Welcome everyone to the mentorship program! 🎉',
-        timestamp: new Date('2025-01-02T10:30:00')
-      }
-    },
-    {
-      id: 'announcements',
-      name: 'Announcements',
-      description: 'Important program updates and announcements',
-      type: 'announcements',
-      memberCount: 52,
-      unreadCount: 1,
-      lastMessage: {
-        id: '2',
-        userId: 'admin',
-        userName: 'Program Admin',
-        userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-        content: 'Phase 1 kickoff meetings start next week. Check your calendars!',
-        timestamp: new Date('2025-01-01T14:00:00')
-      }
-    },
-    {
-      id: 'group-1',
-      name: 'Frontend Focus Group',
-      description: 'Sarah Chen + 3 mentees',
-      type: 'group',
-      memberCount: 4,
-      unreadCount: 0,
-      lastMessage: {
-        id: '3',
-        userId: '3',
-        userName: 'Alex Rivera',
-        userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-        content: 'Thanks for the React resources, very helpful!',
-        timestamp: new Date('2025-01-01T16:20:00')
-      }
-    }
-  ];
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
 
-  // Mock messages for selected channel
-  const messages: Message[] = [
-    {
-      id: '1',
-      userId: 'admin',
-      userName: 'Program Admin',
-      userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-      content: 'Welcome to the Torc Mentorship Program! This is where we\'ll communicate throughout the program.',
-      timestamp: new Date('2025-01-01T09:00:00'),
-      isSystem: true
-    },
-    {
-      id: '2',
-      userId: '1',
-      userName: 'Sarah Chen',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face',
-      content: 'Hi everyone! I\'m excited to be your mentor for this cohort. Looking forward to working with you all! 🚀',
-      timestamp: new Date('2025-01-01T10:15:00')
-    },
-    {
-      id: '3',
-      userId: '3',
-      userName: 'Alex Rivera',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-      content: 'Thank you Sarah! Really excited to start this journey. I\'ve been working on my goals and can\'t wait to share them.',
-      timestamp: new Date('2025-01-01T10:30:00')
-    },
-    {
-      id: '4',
-      userId: '4',
-      userName: 'Jordan Kim',
-      userAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=32&h=32&fit=crop&crop=face',
-      content: 'Same here! Quick question - when is our first group meeting scheduled?',
-      timestamp: new Date('2025-01-01T11:00:00')
-    },
-    {
-      id: '5',
-      userId: '1',
-      userName: 'Sarah Chen',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b5c6e3d8?w=32&h=32&fit=crop&crop=face',
-      content: 'Great question Jordan! Our first meeting is scheduled for Wednesday, January 15th at 6:00 PM EST. I\'ll send out calendar invites today.',
-      timestamp: new Date('2025-01-01T11:15:00')
-    }
-  ];
+    const message: Message = {
+      id: Date.now().toString(),
+      userId: user?.id || '',
+      userName: profile?.display_name || 'Anonymous',
+      userAvatar: profile?.avatar_url || '',
+      content: newMessage,
+      timestamp: new Date()
+    };
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // Handle sending message
-      console.log('Sending message:', newMessage);
-      setNewMessage('');
+    setMessages([...messages, message]);
+
+    // Send email notification to group members
+    try {
+      await supabase.functions.invoke('send-notification', {
+        body: {
+          type: 'message_received',
+          recipient_email: 'group-member@example.com',
+          recipient_name: 'Group Member',
+          sender_name: profile?.display_name || 'Team Member',
+          data: {
+            message: newMessage,
+            group_name: getCurrentChannel().name
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Failed to send notification:', error);
     }
+
+    setNewMessage('');
+    toast({
+      title: "Message Sent",
+      description: "Your message has been sent.",
+    });
   };
 
   const getCurrentChannel = () => {
@@ -257,13 +238,13 @@ export default function Communication() {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleVideoCall}>
                 <Video className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleVoiceCall}>
                 <Volume2 className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleMoreOptions}>
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </div>
@@ -318,10 +299,10 @@ export default function Communication() {
               />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={handleAttachFile}>
                     <Paperclip className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={handleAddEmoji}>
                     <Smile className="w-4 h-4" />
                   </Button>
                 </div>
@@ -344,31 +325,12 @@ export default function Communication() {
       {/* Right Sidebar - Online Members */}
       <div className="w-64 bg-gradient-card border border-border rounded-lg shadow-card">
         <div className="p-4 border-b border-border">
-          <h3 className="font-semibold text-foreground">Online Now</h3>
+          <h3 className="font-semibold text-foreground">Group Members</h3>
+          <p className="text-xs text-muted-foreground mt-1">Members will appear when you join a group</p>
         </div>
-        <div className="p-2">
-          {[
-            { name: 'Sarah Chen', role: 'Mentor', status: 'online' },
-            { name: 'Alex Rivera', role: 'Mentee', status: 'online' },
-            { name: 'Jordan Kim', role: 'Mentee', status: 'away' },
-            { name: 'Sam Taylor', role: 'Mentee', status: 'offline' }
-          ].map((member, index) => (
-            <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50">
-              <div className="relative">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
-                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${
-                  member.status === 'online' ? 'bg-success' :
-                  member.status === 'away' ? 'bg-warning' : 'bg-muted'
-                }`} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">{member.name}</p>
-                <p className="text-xs text-muted-foreground">{member.role}</p>
-              </div>
-            </div>
-          ))}
+        <div className="p-4 text-center">
+          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No active members</p>
         </div>
       </div>
     </div>
