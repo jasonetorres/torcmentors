@@ -50,6 +50,8 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'all' | UserRole>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,20 +67,42 @@ export default function UsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        
+        // Get all users from auth.users via profiles and add email from auth
+        const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('*');
 
-        if (error) {
-          console.error('Error fetching users:', error);
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
           toast({
             title: "Error",
             description: "Failed to fetch users",
             variant: "destructive"
           });
-        } else {
-          setUsers((data || []) as AppUser[]);
+          return;
         }
+
+        // Get auth users to match emails (this requires admin access)
+        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+        
+        if (authError) {
+          console.error('Error fetching auth users:', authError);
+          // If we can't get auth data, just use profiles without emails
+          setUsers((profilesData || []).map(profile => ({ ...profile, email: 'Email not available' })) as AppUser[]);
+          return;
+        }
+
+        // Combine profile data with auth data
+        const usersWithEmails = (profilesData || []).map(profile => {
+          const authUser = authData?.users?.find((user: any) => user.id === profile.user_id);
+          return {
+            ...profile,
+            email: authUser?.email || 'No email'
+          };
+        });
+
+        setUsers(usersWithEmails as AppUser[]);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -163,6 +187,7 @@ export default function UsersPage() {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = (user.display_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (user.user_id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     return matchesSearch && matchesRole;
@@ -243,6 +268,99 @@ export default function UsersPage() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Edit User Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information and role
+              </DialogDescription>
+            </DialogHeader>
+            {editingUser && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="editUserName">Full Name</Label>
+                  <Input 
+                    id="editUserName" 
+                    value={editingUser.display_name || ''}
+                    onChange={(e) => setEditingUser({...editingUser, display_name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>Email Address</Label>
+                  <Input 
+                    value={editingUser.email || ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+                </div>
+                <div>
+                  <Label htmlFor="editUserRole">Role</Label>
+                  <Select value={editingUser.role} onValueChange={(value: UserRole) => setEditingUser({...editingUser, role: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mentor">Mentor</SelectItem>
+                      <SelectItem value="mentee">Mentee</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editUserBio">Bio</Label>
+                  <Input 
+                    id="editUserBio" 
+                    value={editingUser.bio || ''}
+                    onChange={(e) => setEditingUser({...editingUser, bio: e.target.value})}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1 bg-gradient-primary" 
+                    onClick={async () => {
+                      try {
+                        const { error } = await supabase
+                          .from('profiles')
+                          .update({
+                            display_name: editingUser.display_name,
+                            role: editingUser.role,
+                            bio: editingUser.bio
+                          })
+                          .eq('user_id', editingUser.user_id);
+
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to update user",
+                            variant: "destructive"
+                          });
+                        } else {
+                          setUsers(users.map(u => u.user_id === editingUser.user_id ? editingUser : u));
+                          setIsEditDialogOpen(false);
+                          toast({
+                            title: "Success",
+                            description: "User updated successfully"
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Error updating user:', error);
+                      }
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -351,6 +469,11 @@ export default function UsersPage() {
                     </Badge>
                   </div>
                   
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <Mail className="w-3 h-3" />
+                    <span>{user.email}</span>
+                  </div>
+                  
                   <p className="text-sm text-muted-foreground mb-2">{user.user_id}</p>
                   
                   {user.bio && (
@@ -379,7 +502,10 @@ export default function UsersPage() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => toast({ title: "Edit User", description: "User editing functionality coming soon." })}
+                    onClick={() => {
+                      setEditingUser(user);
+                      setIsEditDialogOpen(true);
+                    }}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit

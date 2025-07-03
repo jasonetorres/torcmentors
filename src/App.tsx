@@ -88,11 +88,13 @@ function AppRoutes() {
         {effectiveRole === 'admin' && (
           <>
             <Route path="/admin/create-users" element={<AdminUserCreation />} />
-            <Route path="/groups" element={<Groups />} />
-            <Route path="/users" element={<Users />} />
             <Route path="/analytics" element={<Analytics />} />
           </>
         )}
+        
+        {/* Shared Admin/Management Routes */}
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/users" element={<Users />} />
         
         {/* Shared Routes */}
         <Route path="/surveys" element={<Surveys />} />
