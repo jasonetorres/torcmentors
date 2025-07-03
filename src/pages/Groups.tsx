@@ -52,12 +52,13 @@ interface Group {
   description: string;
   phase: string;
   status: 'active' | 'forming' | 'completed';
-  mentorId: string;
+  mentor_id: string | null;
   mentorName: string;
   menteeCount: number;
   maxSize: number;
   schedule: string;
-  createdAt: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function Groups() {
@@ -75,6 +76,7 @@ export default function Groups() {
   const [selectedMentees, setSelectedMentees] = useState<string[]>([]);
   const [selectedMentor, setSelectedMentor] = useState<string>('');
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingGroups, setLoadingGroups] = useState(true);
 
   const [newGroup, setNewGroup] = useState({
     name: '',
@@ -84,6 +86,59 @@ export default function Groups() {
     maxSize: '4',
     schedule: ''
   });
+
+  // Fetch groups on component mount
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const fetchGroups = async () => {
+    setLoadingGroups(true);
+    try {
+      const { data: groupsData, error: groupsError } = await supabase
+        .from('groups')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (groupsError) {
+        console.error('Error fetching groups:', groupsError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch groups",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get user data to calculate member counts and mentor names
+      const { data: usersResponse, error: usersError } = await supabase.functions.invoke('get-users-with-emails');
+      
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      }
+
+      const allUsers = usersResponse?.success ? usersResponse.users : [];
+
+      // Process groups with member counts and mentor names
+      const processedGroups = (groupsData || []).map(group => {
+        const menteeCount = allUsers.filter((user: AppUser) => user.group_id === group.id && user.role === 'mentee').length;
+        const mentor = allUsers.find((user: AppUser) => user.user_id === group.mentor_id);
+        
+        return {
+          ...group,
+          mentorName: mentor?.display_name || 'Unassigned',
+          menteeCount,
+          maxSize: group.max_size
+        };
+      });
+
+      setGroups(processedGroups);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
 
   // Fetch users when assign dialog opens
   useEffect(() => {
@@ -113,7 +168,7 @@ export default function Groups() {
     }
   };
 
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     if (!newGroup.name.trim() || !newGroup.description.trim()) {
       toast({
         title: "Error",
@@ -123,35 +178,56 @@ export default function Groups() {
       return;
     }
 
-    const group: Group = {
-      id: `group-${Date.now()}`,
-      name: newGroup.name,
-      description: newGroup.description,
-      phase: newGroup.phase,
-      status: 'forming',
-      mentorId: newGroup.mentorId || 'unassigned',
-      mentorName: newGroup.mentorId ? 'Assigned Mentor' : 'Unassigned',
-      menteeCount: 0,
-      maxSize: parseInt(newGroup.maxSize),
-      schedule: newGroup.schedule,
-      createdAt: new Date()
-    };
+    try {
+      const { data, error } = await supabase
+        .from('groups')
+        .insert({
+          name: newGroup.name,
+          description: newGroup.description,
+          phase: newGroup.phase,
+          status: 'forming',
+          mentor_id: newGroup.mentorId || null,
+          max_size: parseInt(newGroup.maxSize),
+          schedule: newGroup.schedule
+        })
+        .select()
+        .single();
 
-    setGroups([...groups, group]);
-    setNewGroup({
-      name: '',
-      description: '',
-      phase: 'phase1',
-      mentorId: '',
-      maxSize: '4',
-      schedule: ''
-    });
-    setIsCreateDialogOpen(false);
+      if (error) {
+        console.error('Error creating group:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create group",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    toast({
-      title: "Group Created",
-      description: "New mentorship group has been created successfully.",
-    });
+      // Refresh groups list
+      await fetchGroups();
+
+      setNewGroup({
+        name: '',
+        description: '',
+        phase: 'phase1',
+        mentorId: '',
+        maxSize: '4',
+        schedule: ''
+      });
+      setIsCreateDialogOpen(false);
+
+      toast({
+        title: "Group Created",
+        description: "New mentorship group has been created successfully.",
+      });
+    } catch (error) {
+      console.error('Error creating group:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create group",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteGroup = (groupId: string) => {
@@ -168,7 +244,7 @@ export default function Groups() {
       name: group.name,
       description: group.description,
       phase: group.phase,
-      mentorId: group.mentorId,
+      mentorId: group.mentor_id || '',
       maxSize: group.maxSize.toString(),
       schedule: group.schedule
     });
@@ -431,7 +507,7 @@ export default function Groups() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Created</p>
-                  <p className="font-medium text-foreground">{group.createdAt.toLocaleDateString()}</p>
+                  <p className="font-medium text-foreground">{new Date(group.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
 
@@ -695,8 +771,9 @@ export default function Groups() {
                     setSelectedMentor('');
                     setSelectedMentees([]);
                     
-                    // Refresh users list
-                    fetchUsers();
+                    // Refresh both users list and groups list to show updated counts
+                    await fetchUsers();
+                    await fetchGroups();
                     
                     toast({
                       title: "Users Assigned",

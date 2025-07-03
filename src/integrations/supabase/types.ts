@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          max_size: number | null
+          mentor_id: string | null
+          name: string
+          phase: string | null
+          schedule: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_size?: number | null
+          mentor_id?: string | null
+          name: string
+          phase?: string | null
+          schedule?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_size?: number | null
+          mentor_id?: string | null
+          name?: string
+          phase?: string | null
+          schedule?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
