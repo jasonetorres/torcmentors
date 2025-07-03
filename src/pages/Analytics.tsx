@@ -45,29 +45,29 @@ export default function Analytics() {
   const overviewStats = [
     { 
       title: "Program Completion Rate", 
-      value: "95%", 
-      change: "+3% this quarter", 
+      value: "0%", 
+      change: "", 
       icon: Award, 
       color: "text-success" 
     },
     { 
       title: "Average Engagement Score", 
-      value: "87", 
-      change: "+5 points this month", 
+      value: "0", 
+      change: "", 
       icon: TrendingUp, 
       color: "text-primary" 
     },
     { 
       title: "Goals Achieved", 
-      value: "142", 
-      change: "+23 this month", 
+      value: "0", 
+      change: "", 
       icon: Target, 
       color: "text-accent" 
     },
     { 
       title: "Mentor Satisfaction", 
-      value: "4.8/5", 
-      change: "+0.2 this quarter", 
+      value: "0/5", 
+      change: "", 
       icon: MessageSquare, 
       color: "text-warning" 
     }
@@ -145,49 +145,10 @@ export default function Analytics() {
                 Track completion rates and progress across all mentor groups
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {mockAnalytics.groupProgress.map((group) => (
-                <div key={group.groupId} className="p-4 rounded-lg bg-secondary/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h4 className="font-semibold text-foreground">{group.groupName}</h4>
-                      <p className="text-sm text-muted-foreground">Mentor: {group.mentor}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="border-primary text-primary">
-                        {group.currentPhase}
-                      </Badge>
-                      <span className="text-lg font-bold text-foreground">
-                        {group.completionPercentage}%
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Active Mentees</p>
-                      <p className="font-medium text-foreground">{group.activeMentees}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Upcoming Deadlines</p>
-                      <p className="font-medium text-foreground">{group.upcomingDeadlines}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Last Activity</p>
-                      <p className="font-medium text-foreground">
-                        {group.lastActivity.toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full bg-secondary rounded-full h-3">
-                    <div 
-                      className="bg-gradient-primary h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${group.completionPercentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+            <CardContent className="p-12 text-center">
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Groups Data</p>
+              <p className="text-muted-foreground">Group progress will appear here once mentoring groups are created</p>
             </CardContent>
           </Card>
 
@@ -199,37 +160,10 @@ export default function Analytics() {
                 Phase Completion Rates
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockAnalytics.phaseCompletion.map((phase) => (
-                  <div key={phase.phase} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium text-foreground capitalize">
-                          {phase.phase.replace('phase', 'Phase ')}
-                        </span>
-                        <p className="text-sm text-muted-foreground">
-                          {phase.completedGroups}/{phase.totalGroups} groups completed
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-bold text-foreground">
-                          {phase.successRate}%
-                        </span>
-                        <p className="text-sm text-muted-foreground">
-                          Avg: {phase.averageCompletionTime} days
-                        </p>
-                      </div>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div 
-                        className="bg-gradient-accent h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${phase.successRate}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Phase Data</p>
+              <p className="text-muted-foreground">Phase completion analytics will appear here as groups progress</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -245,46 +179,10 @@ export default function Analytics() {
                 Track individual mentee participation and activity levels
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockAnalytics.menteeEngagement.map((mentee) => (
-                  <div key={mentee.userId} className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{mentee.userName}</h4>
-                        <p className="text-sm text-muted-foreground">Group: {mentee.groupId}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Engagement Score</span>
-                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          mentee.engagementScore >= 80 
-                            ? 'bg-success/20 text-success' 
-                            : mentee.engagementScore >= 60 
-                            ? 'bg-warning/20 text-warning' 
-                            : 'bg-destructive/20 text-destructive'
-                        }`}>
-                          {mentee.engagementScore}/100
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Goals Completed</p>
-                        <p className="font-medium text-foreground">{mentee.goalsCompleted}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Meetings Attended</p>
-                        <p className="font-medium text-foreground">{mentee.meetingsAttended}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Tasks Completed</p>
-                        <p className="font-medium text-foreground">{mentee.tasksCompleted}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Engagement Data</p>
+              <p className="text-muted-foreground">Mentee engagement metrics will appear here once activities begin</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -300,45 +198,10 @@ export default function Analytics() {
                 Success rates and completion times by goal category
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockAnalytics.goalAchievement.map((category) => (
-                  <div key={category.category} className="p-4 rounded-lg bg-secondary/50">
-                    <h4 className="font-semibold text-foreground capitalize mb-3">
-                      {category.category} Goals
-                    </h4>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Total Goals</span>
-                        <span className="font-medium text-foreground">{category.totalGoals}</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Completed</span>
-                        <span className="font-medium text-foreground">{category.completedGoals}</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Success Rate</span>
-                        <span className="font-medium text-success">{category.successRate}%</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Avg Completion</span>
-                        <span className="font-medium text-foreground">{category.avgCompletionTime} days</span>
-                      </div>
-                      
-                      <div className="w-full bg-secondary rounded-full h-2 mt-3">
-                        <div 
-                          className="bg-gradient-primary h-2 rounded-full"
-                          style={{ width: `${category.successRate}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Goal Data</p>
+              <p className="text-muted-foreground">Goal achievement statistics will appear here as mentees set and complete goals</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -354,48 +217,10 @@ export default function Analytics() {
                 Track which resources are most popular and effective
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockAnalytics.resourceUsage.map((resource) => (
-                  <div key={resource.resourceId} className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-foreground">{resource.resourceTitle}</h4>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">
-                          {resource.avgRating}/5
-                        </span>
-                        <div className="flex">
-                          {[1,2,3,4,5].map((star) => (
-                            <Clock 
-                              key={star} 
-                              className={`w-3 h-3 ${
-                                star <= resource.avgRating ? 'text-warning' : 'text-muted-foreground'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Views</p>
-                        <p className="font-medium text-foreground">{resource.viewCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Downloads</p>
-                        <p className="font-medium text-foreground">{resource.downloadCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Last Accessed</p>
-                        <p className="font-medium text-foreground">
-                          {resource.lastAccessed.toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Resource Usage Data</p>
+              <p className="text-muted-foreground">Resource usage statistics will appear here as resources are accessed</p>
             </CardContent>
           </Card>
         </TabsContent>

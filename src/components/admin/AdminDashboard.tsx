@@ -3,6 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Users, 
   BookOpen, 
@@ -17,36 +22,73 @@ import {
 } from 'lucide-react';
 import { mockAnalytics, mockGroups, mockUsers, mockResources } from '@/data/mockData';
 import { Group, User, Resource } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 export function AdminDashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
+  const [newResource, setNewResource] = useState({
+    title: '',
+    description: '',
+    type: 'guide',
+    phase: 'phase1',
+    estimatedReadTime: 10
+  });
+  const { toast } = useToast();
+
+  const handleAddResource = () => {
+    if (!newResource.title.trim() || !newResource.description.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Here you would typically save to database
+    toast({
+      title: "Resource Added",
+      description: `${newResource.title} has been added to the resource library.`,
+    });
+
+    // Reset form
+    setNewResource({
+      title: '',
+      description: '',
+      type: 'guide',
+      phase: 'phase1',
+      estimatedReadTime: 10
+    });
+    setIsAddResourceOpen(false);
+  };
 
   const stats = [
     {
       title: "Total Mentors",
-      value: "10",
-      change: "+2 this month",
+      value: "0",
+      change: "",
       icon: Users,
       color: "text-primary"
     },
     {
       title: "Active Mentees", 
-      value: "42",
-      change: "+8 this month",
+      value: "0",
+      change: "",
       icon: UserPlus,
       color: "text-accent"
     },
     {
       title: "Program Completion",
-      value: "78%",
-      change: "+5% this month",
+      value: "0%",
+      change: "",
       icon: TrendingUp,
       color: "text-success"
     },
     {
       title: "Resource Library",
-      value: "156",
-      change: "+12 this week",
+      value: "2",
+      change: "",
       icon: BookOpen,
       color: "text-warning"
     }
@@ -121,26 +163,8 @@ export function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
-                  <div className="w-2 h-2 rounded-full bg-success"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">New mentee joined Frontend Focus Group</p>
-                    <p className="text-xs text-muted-foreground">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Phase 2 materials uploaded</p>
-                    <p className="text-xs text-muted-foreground">5 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
-                  <div className="w-2 h-2 rounded-full bg-accent"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Group meeting completed</p>
-                    <p className="text-xs text-muted-foreground">1 day ago</p>
-                  </div>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No recent activity</p>
                 </div>
               </CardContent>
             </Card>
@@ -154,32 +178,8 @@ export function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                  <div>
-                    <p className="text-sm font-medium">Mid-program survey due</p>
-                    <p className="text-xs text-muted-foreground">3 groups pending</p>
-                  </div>
-                  <Badge variant="outline" className="border-warning text-warning">
-                    2 days
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                  <div>
-                    <p className="text-sm font-medium">Phase 3 kick-off</p>
-                    <p className="text-xs text-muted-foreground">All groups</p>
-                  </div>
-                  <Badge variant="outline" className="border-accent text-accent">
-                    1 week
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                  <div>
-                    <p className="text-sm font-medium">Mentor feedback session</p>
-                    <p className="text-xs text-muted-foreground">Individual meetings</p>
-                  </div>
-                  <Badge variant="outline" className="border-primary text-primary">
-                    2 weeks
-                  </Badge>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No upcoming deadlines</p>
                 </div>
               </CardContent>
             </Card>
@@ -195,51 +195,14 @@ export function AdminDashboard() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {mockGroups.map((group: Group) => (
-              <Card key={group.id} className="bg-gradient-card border-border shadow-card">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{group.name}</CardTitle>
-                    <Badge 
-                      variant="secondary"
-                      className="bg-success/20 text-success border-success/30"
-                    >
-                      {group.status}
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    Mentor: {mockUsers.find(u => u.id === group.mentorId)?.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Current Phase:</span>
-                    <Badge variant="outline" className="border-primary text-primary">
-                      {group.currentPhase}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Mentees:</span>
-                    <span className="font-medium">{group.menteeIds.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress:</span>
-                    <span className="font-medium">
-                      {group.completedSessions}/{group.totalSessions} sessions
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      View Details
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MessageSquare className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="text-center py-12">
+            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-lg font-medium text-foreground mb-2">No Groups Yet</p>
+            <p className="text-muted-foreground mb-4">Create your first mentor group to get started</p>
+            <Button className="bg-gradient-primary">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Create First Group
+            </Button>
           </div>
         </TabsContent>
 
@@ -253,51 +216,14 @@ export function AdminDashboard() {
           </div>
 
           <Card className="bg-gradient-card border-border shadow-card">
-            <CardContent className="p-0">
-              <div className="grid grid-cols-1 gap-0 divide-y divide-border">
-                {mockUsers.map((user: User) => (
-                  <div key={user.id} className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name}
-                          className="w-10 h-10 rounded-full border-2 border-border"
-                        />
-                        <div>
-                          <p className="font-medium text-foreground">{user.name}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge 
-                          variant="secondary"
-                          className={
-                            user.role === 'admin' ? 'bg-primary/20 text-primary border-primary/30' :
-                            user.role === 'mentor' ? 'bg-accent/20 text-accent border-accent/30' :
-                            'bg-secondary text-secondary-foreground'
-                          }
-                        >
-                          {user.role}
-                        </Badge>
-                        <Badge 
-                          variant="outline"
-                          className={
-                            user.isOnboardingComplete 
-                              ? 'border-success text-success' 
-                              : 'border-warning text-warning'
-                          }
-                        >
-                          {user.isOnboardingComplete ? 'Complete' : 'Pending'}
-                        </Badge>
-                        <Button variant="outline" size="sm">
-                          Manage
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">No Users Yet</p>
+              <p className="text-muted-foreground mb-4">Start by inviting mentors and mentees to the program</p>
+              <Button className="bg-gradient-primary">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Invite First User
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -305,10 +231,91 @@ export function AdminDashboard() {
         <TabsContent value="resources" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Resource Library</h2>
-            <Button className="bg-gradient-primary">
-              <FileText className="w-4 h-4 mr-2" />
-              Add Resource
-            </Button>
+            <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-primary">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Add Resource
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Resource</DialogTitle>
+                  <DialogDescription>
+                    Add a new resource to the program library
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="resourceTitle">Title</Label>
+                    <Input 
+                      id="resourceTitle" 
+                      placeholder="Resource title"
+                      value={newResource.title}
+                      onChange={(e) => setNewResource({...newResource, title: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="resourceDescription">Description</Label>
+                    <Textarea 
+                      id="resourceDescription" 
+                      placeholder="Brief description of the resource"
+                      value={newResource.description}
+                      onChange={(e) => setNewResource({...newResource, description: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="resourceType">Type</Label>
+                      <Select value={newResource.type} onValueChange={(value) => setNewResource({...newResource, type: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="guide">Guide</SelectItem>
+                          <SelectItem value="document">Document</SelectItem>
+                          <SelectItem value="case-study">Case Study</SelectItem>
+                          <SelectItem value="video">Video</SelectItem>
+                          <SelectItem value="article">Article</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="resourcePhase">Phase</Label>
+                      <Select value={newResource.phase} onValueChange={(value) => setNewResource({...newResource, phase: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="phase1">Phase 1</SelectItem>
+                          <SelectItem value="phase2">Phase 2</SelectItem>
+                          <SelectItem value="phase3">Phase 3</SelectItem>
+                          <SelectItem value="phase4">Phase 4</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="readTime">Estimated Read Time (minutes)</Label>
+                    <Input 
+                      id="readTime" 
+                      type="number"
+                      placeholder="10"
+                      value={newResource.estimatedReadTime}
+                      onChange={(e) => setNewResource({...newResource, estimatedReadTime: parseInt(e.target.value) || 10})}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-gradient-primary" onClick={handleAddResource}>
+                      Add Resource
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsAddResourceOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -365,46 +372,9 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {mockAnalytics.phaseCompletion.map((phase) => (
-                  <div key={phase.phase} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="capitalize">{phase.phase}</span>
-                      <span className="font-medium">{phase.successRate}%</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div 
-                        className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${phase.successRate}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Goal Achievement */}
-            <Card className="bg-gradient-card border-border shadow-card">
-              <CardHeader>
-                <CardTitle>Goal Achievement</CardTitle>
-                <CardDescription>
-                  Completion rates by goal category
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {mockAnalytics.goalAchievement.map((goal) => (
-                  <div key={goal.category} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="capitalize">{goal.category}</span>
-                      <span className="font-medium">{goal.successRate}%</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div 
-                        className="bg-gradient-accent h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${goal.successRate}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No analytics data available yet</p>
+              </div>
               </CardContent>
             </Card>
           </div>
