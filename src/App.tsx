@@ -3,8 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import Login from "./pages/Login";
+import { AuthProvider, useAuth } from "@/hooks/useSupabaseAuth";
+import Auth from "./pages/Auth";
 import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
 import Communication from "./pages/Communication";
@@ -29,7 +29,7 @@ import Layout from "./components/layout/Layout";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { user, isLoading } = useAuth();
+  const { user, profile, isLoading } = useAuth();
 
   // Show loading screen
   if (isLoading) {
@@ -43,19 +43,19 @@ function AppRoutes() {
     );
   }
 
-  // No user - show login
+  // No user - show auth
   if (!user) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );
   }
 
   // User not onboarded - show setup flow (except for admin)
-  if (!user.isOnboardingComplete && user.role !== 'admin') {
-    if (user.onboardingStep === 'account-setup') {
+  if (profile && !profile.is_onboarding_complete && profile.role !== 'admin') {
+    if (profile.onboarding_step === 'account-setup') {
       return (
         <Routes>
           <Route path="/setup" element={<AccountSetup />} />
@@ -79,7 +79,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Admin Routes */}
-        {user.role === 'admin' && (
+        {profile?.role === 'admin' && (
           <>
             <Route path="/groups" element={<Groups />} />
             <Route path="/users" element={<Users />} />
@@ -89,7 +89,7 @@ function AppRoutes() {
         )}
         
         {/* Mentor Routes */}
-        {user.role === 'mentor' && (
+        {profile?.role === 'mentor' && (
           <>
             <Route path="/mentor-kit" element={<MentorKit />} />
             <Route path="/feedback" element={<Feedback />} />

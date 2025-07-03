@@ -9,7 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          discord_username: string | null
+          display_name: string | null
+          experience: string | null
+          github_url: string | null
+          group_id: string | null
+          id: string
+          is_onboarding_complete: boolean | null
+          linkedin_url: string | null
+          onboarding_step: string | null
+          preferred_video_tool: string | null
+          role: string | null
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          discord_username?: string | null
+          display_name?: string | null
+          experience?: string | null
+          github_url?: string | null
+          group_id?: string | null
+          id?: string
+          is_onboarding_complete?: boolean | null
+          linkedin_url?: string | null
+          onboarding_step?: string | null
+          preferred_video_tool?: string | null
+          role?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          discord_username?: string | null
+          display_name?: string | null
+          experience?: string | null
+          github_url?: string | null
+          group_id?: string | null
+          id?: string
+          is_onboarding_complete?: boolean | null
+          linkedin_url?: string | null
+          onboarding_step?: string | null
+          preferred_video_tool?: string | null
+          role?: string | null
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

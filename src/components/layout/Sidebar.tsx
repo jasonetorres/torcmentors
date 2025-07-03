@@ -22,12 +22,12 @@ import {
   Clock,
   TrendingUp
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const adminNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
@@ -65,8 +65,8 @@ export default function Sidebar() {
   ];
 
   const navItems = 
-    user?.role === 'admin' ? adminNavItems :
-    user?.role === 'mentor' ? mentorNavItems :
+    profile?.role === 'admin' ? adminNavItems :
+    profile?.role === 'mentor' ? mentorNavItems :
     menteeNavItems;
 
   return (
@@ -85,8 +85,8 @@ export default function Sidebar() {
               <div>
                 <h1 className="font-bold text-foreground text-lg">Torc Mentorship</h1>
                 <p className="text-sm text-muted-foreground">
-                  {user?.role === 'admin' ? 'Admin Panel' : 
-                   user?.role === 'mentor' ? 'Mentor Portal' : 'Mentee Portal'}
+                  {profile?.role === 'admin' ? 'Admin Panel' : 
+                   profile?.role === 'mentor' ? 'Mentor Portal' : 'Mentee Portal'}
                 </p>
               </div>
             </div>
@@ -180,17 +180,17 @@ export default function Sidebar() {
           isCollapsed && "justify-center"
         )}>
           <img
-            src={user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'}
-            alt={user?.name || 'User'}
+            src={profile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'}
+            alt={profile?.display_name || user?.email || 'User'}
             className="w-10 h-10 rounded-full border-2 border-primary/30 shadow-card"
           />
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">
-                {user?.name}
+                {profile?.display_name || user?.email}
               </p>
               <p className="text-xs text-muted-foreground capitalize">
-                {user?.role}
+                {profile?.role}
               </p>
             </div>
           )}

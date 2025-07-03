@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Bell, Search, LogOut } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useSupabaseAuth';
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   return (
     <header className="h-16 border-b border-border bg-gradient-card px-6 flex items-center justify-between shadow-card">
@@ -27,8 +27,8 @@ export default function Header() {
         </Button>
         
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">{user?.name}</span>
-          <Button variant="ghost" size="sm" onClick={logout}>
+          <span className="text-sm font-medium text-foreground">{profile?.display_name || user?.email}</span>
+          <Button variant="ghost" size="sm" onClick={signOut}>
             <LogOut className="w-4 h-4" />
           </Button>
         </div>
