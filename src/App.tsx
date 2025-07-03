@@ -25,6 +25,7 @@ import Group from "./pages/Group";
 import Settings from "./pages/Settings";
 import Feedback from "./pages/Feedback";
 import AdminUserCreation from "./pages/AdminUserCreation";
+import CreateAllUsers from "./pages/CreateAllUsers";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
 
@@ -116,6 +117,7 @@ function AppRoutes() {
         <Route path="/group" element={<Group />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/create-all-users" element={<CreateAllUsers />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
