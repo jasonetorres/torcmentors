@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Users, 
   UserPlus, 
@@ -29,6 +31,20 @@ import {
   Trash2
 } from 'lucide-react';
 import MenteeManagement from '@/components/admin/MenteeManagement';
+
+interface AppUser {
+  id: string;
+  user_id: string;
+  display_name: string;
+  email?: string;
+  role: string;
+  avatar_url: string | null;
+  bio: string | null;
+  group_id: string | null;
+  is_onboarding_complete: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface Group {
   id: string;
@@ -55,6 +71,10 @@ export default function Groups() {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [assigningGroup, setAssigningGroup] = useState<Group | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [selectedMentees, setSelectedMentees] = useState<string[]>([]);
+  const [selectedMentor, setSelectedMentor] = useState<string>('');
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   const [newGroup, setNewGroup] = useState({
     name: '',
@@ -64,6 +84,34 @@ export default function Groups() {
     maxSize: '4',
     schedule: ''
   });
+
+  // Fetch users when assign dialog opens
+  useEffect(() => {
+    if (isAssignDialogOpen && users.length === 0) {
+      fetchUsers();
+    }
+  }, [isAssignDialogOpen]);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('get-users-with-emails');
+      if (error) {
+        console.error('Error fetching users:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch users",
+          variant: "destructive"
+        });
+      } else if (data?.success) {
+        setUsers(data.users as AppUser[]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handleCreateGroup = () => {
     if (!newGroup.name.trim() || !newGroup.description.trim()) {
@@ -558,45 +606,119 @@ export default function Groups() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Available Mentors</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a mentor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mentor-1">Sarah Chen</SelectItem>
-                  <SelectItem value="mentor-2">Mike Rodriguez</SelectItem>
-                  <SelectItem value="mentor-3">Jessica Park</SelectItem>
-                  <SelectItem value="mentor-4">David Kim</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Available Mentees</Label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {['Alice Johnson', 'Bob Smith', 'Carol Davis', 'Dan Wilson', 'Eva Brown'].map((mentee) => (
-                  <div key={mentee} className="flex items-center space-x-2">
-                    <input type="checkbox" id={mentee} className="rounded" />
-                    <label htmlFor={mentee} className="text-sm">{mentee}</label>
-                  </div>
-                ))}
+            {loadingUsers ? (
+              <div className="text-center py-4">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Loading users...</p>
               </div>
-            </div>
+            ) : (
+              <>
+                <div>
+                  <Label>Available Mentors</Label>
+                  <Select value={selectedMentor} onValueChange={setSelectedMentor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a mentor" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border">
+                      {users.filter(user => user.role === 'mentor' && (!user.group_id || user.group_id === assigningGroup?.id)).map((mentor) => (
+                        <SelectItem key={mentor.id} value={mentor.id}>
+                          {mentor.display_name || 'Unnamed'} - {mentor.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Available Mentees ({users.filter(user => user.role === 'mentee' && !user.group_id).length} unassigned)</Label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto border border-border rounded-md p-3 bg-background">
+                    {users.filter(user => user.role === 'mentee' && !user.group_id).map((mentee) => (
+                      <div key={mentee.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={mentee.id}
+                          checked={selectedMentees.includes(mentee.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedMentees([...selectedMentees, mentee.id]);
+                            } else {
+                              setSelectedMentees(selectedMentees.filter(id => id !== mentee.id));
+                            }
+                          }}
+                        />
+                        <label htmlFor={mentee.id} className="text-sm flex-1 cursor-pointer">
+                          <span className="font-medium">{mentee.display_name || 'Unnamed'}</span>
+                          <span className="text-muted-foreground ml-2">({mentee.email})</span>
+                        </label>
+                      </div>
+                    ))}
+                    {users.filter(user => user.role === 'mentee' && !user.group_id).length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No unassigned mentees available
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+            
             <div className="flex gap-2">
               <Button 
                 className="flex-1 bg-gradient-primary" 
-                onClick={() => {
-                  setIsAssignDialogOpen(false);
-                  toast({
-                    title: "Users Assigned",
-                    description: "Mentor and mentees have been assigned to the group.",
-                  });
+                disabled={!selectedMentor && selectedMentees.length === 0}
+                onClick={async () => {
+                  try {
+                    const updates = [];
+                    
+                    // Assign mentor to group
+                    if (selectedMentor) {
+                      updates.push(
+                        supabase
+                          .from('profiles')
+                          .update({ group_id: assigningGroup?.id })
+                          .eq('id', selectedMentor)
+                      );
+                    }
+                    
+                    // Assign mentees to group
+                    if (selectedMentees.length > 0) {
+                      updates.push(
+                        supabase
+                          .from('profiles')
+                          .update({ group_id: assigningGroup?.id })
+                          .in('id', selectedMentees)
+                      );
+                    }
+                    
+                    await Promise.all(updates);
+                    
+                    setIsAssignDialogOpen(false);
+                    setSelectedMentor('');
+                    setSelectedMentees([]);
+                    
+                    // Refresh users list
+                    fetchUsers();
+                    
+                    toast({
+                      title: "Users Assigned",
+                      description: `Successfully assigned ${selectedMentees.length} mentees${selectedMentor ? ' and 1 mentor' : ''} to ${assigningGroup?.name}.`,
+                    });
+                  } catch (error) {
+                    console.error('Error assigning users:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to assign users to group",
+                      variant: "destructive"
+                    });
+                  }
                 }}
               >
                 Assign Users
               </Button>
-              <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+              <Button variant="outline" onClick={() => {
+                setIsAssignDialogOpen(false);
+                setSelectedMentor('');
+                setSelectedMentees([]);
+              }}>
                 Cancel
               </Button>
             </div>
