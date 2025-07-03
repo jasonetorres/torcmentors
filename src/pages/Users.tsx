@@ -67,42 +67,26 @@ export default function UsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        
-        // Get all users from auth.users via profiles and add email from auth
-        const { data: profilesData, error: profilesError } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
           .select('*');
 
-        if (profilesError) {
-          console.error('Error fetching profiles:', profilesError);
+        if (error) {
+          console.error('Error fetching users:', error);
           toast({
             title: "Error",
             description: "Failed to fetch users",
             variant: "destructive"
           });
-          return;
-        }
-
-        // Get auth users to match emails (this requires admin access)
-        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-        
-        if (authError) {
-          console.error('Error fetching auth users:', authError);
-          // If we can't get auth data, just use profiles without emails
-          setUsers((profilesData || []).map(profile => ({ ...profile, email: 'Email not available' })) as AppUser[]);
-          return;
-        }
-
-        // Combine profile data with auth data
-        const usersWithEmails = (profilesData || []).map(profile => {
-          const authUser = authData?.users?.find((user: any) => user.id === profile.user_id);
-          return {
+        } else {
+          // For now, we'll show users without emails since we can't access auth.admin from client
+          // The emails would need to be fetched server-side or stored in profiles
+          const usersWithPlaceholderEmails = (data || []).map(profile => ({
             ...profile,
-            email: authUser?.email || 'No email'
-          };
-        });
-
-        setUsers(usersWithEmails as AppUser[]);
+            email: 'Email not available (requires server-side access)'
+          }));
+          setUsers(usersWithPlaceholderEmails as AppUser[]);
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
