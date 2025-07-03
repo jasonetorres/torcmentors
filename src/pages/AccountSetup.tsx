@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, User, Lock, Mail, Camera } from 'lucide-react';
+import { Star, User, Lock, Mail, Camera, Upload } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AccountSetup() {
   const [formData, setFormData] = useState({
@@ -32,8 +33,69 @@ export default function AccountSetup() {
     'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=80&h=80&fit=crop&crop=face'
   ];
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { updateProfile, user, profile } = useAuth();
   const { toast } = useToast();
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select an image file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      handleInputChange('avatar', data.publicUrl);
+      
+      toast({
+        title: "Avatar Uploaded",
+        description: "Your profile picture has been uploaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload your profile picture. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,6 +290,41 @@ export default function AccountSetup() {
                           </Avatar>
                         </button>
                       ))}
+                    </div>
+
+                    {/* Upload Custom Avatar */}
+                    <div className="mt-4">
+                      <Label className="text-sm font-medium">Or upload your own:</Label>
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full relative"
+                          disabled={uploadingAvatar}
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            disabled={uploadingAvatar}
+                          />
+                          {uploadingAvatar ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                              Uploading...
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-4 h-4" />
+                              Upload Image
+                            </div>
+                          )}
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
