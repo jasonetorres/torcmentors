@@ -150,9 +150,54 @@ export default function Communication() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-6">
-      {/* Sidebar - Channels */}
-      <div className="w-full lg:w-80 bg-gradient-card border border-border rounded-lg shadow-card">
+    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-4 lg:gap-6">
+      {/* Mobile: Channels as collapsible top section */}
+      <div className="lg:hidden">
+        <div className="bg-gradient-card border border-border rounded-lg shadow-card mb-4">
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">Channels</h2>
+              {isMentor && (
+                <Button size="sm" variant="outline" onClick={handleCreateChannel}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="p-2 max-h-40 overflow-y-auto">
+            {channels.map((channel) => (
+              <div
+                key={channel.id}
+                className={`p-3 rounded-lg cursor-pointer transition-colors mb-1 ${
+                  selectedChannel === channel.id
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'hover:bg-secondary/80 text-foreground'
+                }`}
+                onClick={() => setSelectedChannel(channel.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {channel.type === 'group' ? (
+                      <Users className="w-4 h-4" />
+                    ) : (
+                      <Hash className="w-4 h-4" />
+                    )}
+                    <span className="font-medium">{channel.name}</span>
+                    {channel.unreadCount > 0 && (
+                      <Badge variant="destructive" className="h-5 min-w-5 text-xs">
+                        {channel.unreadCount}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: Sidebar - Channels */}
+      <div className="hidden lg:block w-80 bg-gradient-card border border-border rounded-lg shadow-card">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Channels</h2>

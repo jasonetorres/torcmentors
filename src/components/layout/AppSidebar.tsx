@@ -93,8 +93,8 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar variant="inset" className="border-r border-border">
-      <SidebarHeader className="border-b border-border">
+    <Sidebar variant="inset" className="border-r border-border bg-gradient-card">
+      <SidebarHeader className="border-b border-border bg-gradient-card">
         <div className="flex items-center gap-3 p-4">
           <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
             <span className="text-primary-foreground font-bold text-lg">T</span>
