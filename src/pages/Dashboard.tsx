@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useRolePreview } from '@/hooks/useRolePreview';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,12 +20,15 @@ import {
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
+  const { getEffectiveRole } = useRolePreview();
 
-  if (profile?.role === 'admin') {
+  const effectiveRole = getEffectiveRole(profile?.role);
+
+  if (effectiveRole === 'admin') {
     return <AdminDashboard />;
   }
 
-  const isMentor = profile?.role === 'mentor';
+  const isMentor = effectiveRole === 'mentor';
 
   const stats = isMentor ? [
     { title: "Group Members", value: "3", change: "mentees", icon: Users, color: "text-primary" },

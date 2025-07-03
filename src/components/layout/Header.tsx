@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Search, LogOut, Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
+import RolePreviewSwitcher from '@/components/admin/RolePreviewSwitcher';
 
 export default function Header() {
   const { user, profile, signOut } = useAuth();
@@ -44,7 +45,9 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        {profile?.role === 'admin' && <RolePreviewSwitcher />}
+        
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="relative">

@@ -23,11 +23,13 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useRolePreview } from '@/hooks/useRolePreview';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user, profile } = useAuth();
+  const { getEffectiveRole } = useRolePreview();
 
   const adminNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, badge: null },
@@ -64,9 +66,10 @@ export default function Sidebar() {
     { name: 'Progress', href: '/progress', icon: TrendingUp, badge: null }
   ];
 
+  const effectiveRole = getEffectiveRole(profile?.role);
   const navItems = 
-    profile?.role === 'admin' ? adminNavItems :
-    profile?.role === 'mentor' ? mentorNavItems :
+    effectiveRole === 'admin' ? adminNavItems :
+    effectiveRole === 'mentor' ? mentorNavItems :
     menteeNavItems;
 
   return (
@@ -85,8 +88,8 @@ export default function Sidebar() {
               <div>
                 <h1 className="font-bold text-foreground text-lg">Torc Mentorship</h1>
                 <p className="text-sm text-muted-foreground">
-                  {profile?.role === 'admin' ? 'Admin Panel' : 
-                   profile?.role === 'mentor' ? 'Mentor Portal' : 'Mentee Portal'}
+                  {effectiveRole === 'admin' ? 'Admin Panel' : 
+                   effectiveRole === 'mentor' ? 'Mentor Portal' : 'Mentee Portal'}
                 </p>
               </div>
             </div>
