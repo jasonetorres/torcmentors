@@ -11,11 +11,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, MessageSquare, Users, Calendar, TrendingUp, Trash2, BarChart3, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useSupabaseAuth';
+import { useRolePreview } from '@/hooks/useRolePreview';
 
 export default function Surveys() {
   const { toast } = useToast();
   const { profile } = useAuth();
-  const isAdmin = profile?.role === 'admin';
+  const { getEffectiveRole } = useRolePreview();
+  const isAdmin = getEffectiveRole(profile?.role) === 'admin';
   const [surveys, setSurveys] = useState([
     {
       id: 1,
